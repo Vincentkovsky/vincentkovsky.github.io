@@ -20,12 +20,12 @@ import {
 
 // Firebase配置 - 请替换为您的Firebase项目配置
 const firebaseConfig = {
-  apiKey: "AIzaSyDQ1AaF0akvP-Q_Lu1xM_Eh0WWiiYVbJXw",
-  authDomain: "vincentkovsky.firebaseapp.com",
-  projectId: "vincentkovsky",
-  storageBucket: "vincentkovsky.firebasestorage.app",
-  messagingSenderId: "773913920947",
-  appId: "1:773913920947:web:d4f51c8c4b81c6fe4577c6"
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
 };
 
 // 初始化Firebase
