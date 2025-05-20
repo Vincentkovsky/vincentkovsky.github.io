@@ -1,15 +1,6 @@
 // Firebase访客数据存储模块
 // 注意：您需要在Firebase控制台中创建一个项目，并在这里替换配置信息
 
-/*
-GitHub Pages部署说明：
-1. 在Firebase控制台(https://console.firebase.google.com/)创建一个新项目
-2. 在项目设置中添加一个Web应用
-3. 复制生成的Firebase配置对象，替换下面的配置
-4. 在Firebase控制台中，转到Firestore数据库并创建一个新的数据库（可以从测试模式开始）
-5. 确保在Firebase项目的身份验证部分，调整安全规则以允许读写访问
-*/
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
   getFirestore, 
@@ -29,12 +20,12 @@ import {
 
 // Firebase配置 - 请替换为您的Firebase项目配置
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDQ1AaF0akvP-Q_Lu1xM_Eh0WWiiYVbJXw",
+  authDomain: "vincentkovsky.firebaseapp.com",
+  projectId: "vincentkovsky",
+  storageBucket: "vincentkovsky.firebasestorage.app",
+  messagingSenderId: "773913920947",
+  appId: "1:773913920947:web:d4f51c8c4b81c6fe4577c6"
 };
 
 // 初始化Firebase
