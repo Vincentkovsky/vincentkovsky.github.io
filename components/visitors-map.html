@@ -185,80 +185,125 @@
     }
   </style>
   <script>
-    // 懒加载控制标志
-    let mapInitialized = false;
-    let map = null;
-    let heat = null;
-    
     // 当文档加载完成后通知父窗口调整iframe高度
     window.addEventListener('load', function() {
       if (window.parent) {
-        // 通知父窗口已加载基本结构
+        // 延迟一点时间确保所有内容已经渲染
         setTimeout(function() {
           // 触发父窗口中的resize事件来调整iframe高度
           window.parent.dispatchEvent(new Event('resize'));
-        }, 100); // 减少延迟时间
-      }
-      
-      // 初始化可见区域内容，延迟加载地图和Firebase数据
-      delayedInitialization();
-    });
-    
-    // 延迟初始化函数 - 只加载基本UI结构
-    function delayedInitialization() {
-      // 显示统计卡的骨架屏
-      showSkeletonUI();
-      
-      // 检查元素是否在视口中
-      function isElementInViewport(el) {
-        const rect = el.getBoundingClientRect();
-        return (
-          rect.top >= 0 &&
-          rect.top <= (window.innerHeight || document.documentElement.clientHeight)
-        );
-      }
-      
-      // 使用IntersectionObserver检测地图容器是否可见
-      if ('IntersectionObserver' in window) {
-        const mapContainer = document.getElementById('map-container');
-        
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting && !mapInitialized) {
-              // 地图容器可见且地图尚未初始化，开始初始化
-              initializeMapAndVisitors();
-              mapInitialized = true;
-              observer.disconnect();
-            }
-          });
-        }, {threshold: 0.1});
-        
-        observer.observe(mapContainer);
-      } else {
-        // 回退方案：延迟500ms初始化地图
-        setTimeout(() => {
-          if (!mapInitialized) {
-            initializeMapAndVisitors();
-            mapInitialized = true;
-          }
         }, 500);
       }
-    }
+    });
+  </script>
+  <!-- 导入Firebase模块 -->
+  <script type="module">
+    import FirebaseVisitorStorage from './firebase-config.js';
     
-    // 显示骨架屏UI
-    function showSkeletonUI() {
-      // 为统计卡添加闪烁效果
-      const statValues = document.querySelectorAll('.stat-value');
-      statValues.forEach(el => {
-        el.classList.add('skeleton-loading');
-        el.setAttribute('data-original-text', el.textContent);
-        el.textContent = '-';
-      });
-      
-      // 显示加载叠加层
-      document.getElementById('loading-overlay').style.display = 'flex';
-    }
+    // 将Firebase存储暴露给全局作用域
+    window.FirebaseVisitorStorage = FirebaseVisitorStorage;
     
+    // 在导入完成后通知页面可以开始执行
+    document.dispatchEvent(new Event('firebase-ready'));
+  </script>
+</head>
+<body>
+  <div class="rounded-2xl p-6 md:p-8">
+    <h2 class="text-xl font-bold mb-6 flex items-center">
+      <i class="ph-bold ph-globe mr-2"></i>
+      Visitor Geography
+      <span class="ml-2 text-xs bg-amber-700 text-amber-200 px-2 py-1 rounded-full flex items-center">
+        <i class="ph-bold ph-flame firebase-icon mr-1"></i>Firebase
+      </span>
+    </h2>
+    
+    <!-- 管理按钮 -->
+    <button id="admin-button" class="admin-button" title="管理访客数据">
+      <i class="ph-bold ph-gear"></i>
+    </button>
+    
+    <!-- 管理对话框 -->
+    <div id="admin-modal" class="modal">
+      <div class="modal-content">
+        <h3 class="text-lg font-bold mb-4 flex items-center">
+          <i class="ph-bold ph-flame firebase-icon mr-2"></i>
+          Firebase 访客数据管理
+        </h3>
+        <div class="space-y-4">
+          <div class="text-sm p-2 bg-gray-800 rounded">
+            <div class="flex items-center mb-2">
+              <span class="status-indicator" id="firebase-status"></span>
+              <span class="font-medium" id="connection-status">检查 Firebase 连接状态...</span>
+            </div>
+            <p id="config-details" class="text-xs text-gray-400"></p>
+          </div>
+          
+          <div class="text-sm text-gray-300">
+            <p>当前存储的访客数据:</p>
+            <p id="data-summary">加载中...</p>
+          </div>
+          
+          <div class="flex gap-2">
+            <button id="export-data" class="bg-blue-600 text-white px-3 py-1 rounded text-sm">导出数据</button>
+            <button id="clear-data" class="bg-red-600 text-white px-3 py-1 rounded text-sm">清除数据</button>
+            <button id="close-modal" class="bg-gray-600 text-white px-3 py-1 rounded text-sm">关闭</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Firebase配置警告 -->
+    <div id="firebase-warning" class="hidden mb-4 p-3 bg-red-900 text-white rounded-md">
+      <p class="font-medium flex items-center">
+        <i class="ph-bold ph-warning-circle mr-2"></i>
+        Firebase 未正确配置
+      </p>
+      <p class="text-sm mt-1">
+        请在 <code class="bg-red-800 px-1 rounded">components/firebase-config.js</code> 中设置您的 Firebase 项目配置。
+      </p>
+    </div>
+    
+    <!-- Map container -->
+    <div class="relative">
+      <div id="map-container" class="mb-4"></div>
+      <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+      </div>
+    </div>
+    
+    <!-- Stats row -->
+    <div class="grid grid-cols-3 gap-3 mb-4">
+      <div class="stat-card">
+        <div class="stat-value" id="total-visitors">0</div>
+        <div class="stat-label">Total Visitors</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="total-countries">0</div>
+        <div class="stat-label">Countries</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="total-cities">0</div>
+        <div class="stat-label">Cities</div>
+      </div>
+    </div>
+    
+    <!-- Your visitor info -->
+    <div class="visitor-info mb-4" id="your-location">
+      <h3 class="text-sm font-bold mb-1">Your Location:</h3>
+      <p class="text-sm" id="visitor-location-text">
+        <i class="ph-bold ph-map-pin mr-1"></i> 
+        Detecting your location...
+      </p>
+    </div>
+    
+    <!-- Top locations -->
+    <h3 class="text-md font-bold mb-2">Top Visitor Locations</h3>
+    <div id="top-cities-container" class="space-y-2">
+      <!-- 顶部城市将从JavaScript动态填充 -->
+    </div>
+  </div>
+  
+  <script>
     // 等待Firebase模块加载完成或直接使用
     function initializeMapAndVisitors() {
       // 检查FirebaseVisitorStorage是否已经可用
@@ -296,41 +341,21 @@
         }
       }
       
-      // 延迟初始化地图 - 减少初始加载时间
-      function initMap() {
-        if (map) return; // 已初始化，跳过
-        
-        // 初始化地图
-        map = L.map('map-container', {
-          attributionControl: false,  // 减少渲染元素
-          zoomControl: false,         // 禁用缩放控件，加快渲染
-          keyboard: false             // 禁用键盘交互，减少事件监听器
-        }).setView([20, 0], 2);
-        
-        // 延迟100ms后添加控件，以确保基本地图首先渲染
-        setTimeout(() => {
-          L.control.zoom({position: 'bottomright'}).addTo(map);
-          L.control.attribution({position: 'bottomleft'}).addTo(map);
-        }, 100);
-        
-        // 使用暗色地图风格
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-          subdomains: 'abcd',
-          maxZoom: 19
-        }).addTo(map);
-        
-        // 通知父窗口地图已初始化，可以调整大小
-        if (window.parent) {
-          window.parent.dispatchEvent(new Event('resize'));
-        }
-      }
-
-      // 初始化地图 - 延迟100ms以允许UI渲染
-      setTimeout(initMap, 100);
+      // 初始化地图
+      const map = L.map('map-container').setView([20, 0], 2);
       
-      // 热力图层 - 在地图初始化后延迟加载
-      function loadHeatmapData() {
+      // 使用暗色地图风格
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(map);
+      
+      // 热力图层
+      let heat;
+      
+      // 加载热图数据
+      async function loadHeatmapData() {
         try {
           // 如果已有热图层，先移除
           if (heat) {
@@ -338,58 +363,51 @@
           }
           
           // 从 Firebase 获取热图数据
-          FirebaseVisitorStorage.getHeatmapData().then(heatmapData => {
-            // 创建热力图层
-            heat = L.heatLayer(heatmapData, {
-              radius: 15,
-              blur: 15,
-              maxZoom: 10,
-              gradient: {
-                0.1: '#4ADE80',  // 浅绿色
-                0.3: '#22C55E',  // 中绿色
-                0.5: '#16A34A',  // 深绿色
-                0.7: '#15803D',  // 更深绿色
-                1.0: '#14532D'   // 最深绿色
-              }
-            }).addTo(map);
-          }).catch(error => {
-            console.error('Error loading heatmap data:', error);
-          });
+          const heatmapData = await FirebaseVisitorStorage.getHeatmapData();
+          
+          // 创建热力图层
+          heat = L.heatLayer(heatmapData, {
+            radius: 15,
+            blur: 15,
+            maxZoom: 10,
+            gradient: {
+              0.1: '#4ADE80',  // 浅绿色
+              0.3: '#22C55E',  // 中绿色
+              0.5: '#16A34A',  // 深绿色
+              0.7: '#15803D',  // 更深绿色
+              1.0: '#14532D'   // 最深绿色
+            }
+          }).addTo(map);
         } catch (error) {
           console.error('Error loading heatmap data:', error);
         }
       }
       
-      // 为主要城市添加标记和弹出窗口 - 延迟加载以提高渲染性能
-      function addCityMarkers() {
-        const cityMarkers = [
-          { name: "San Francisco", country: "USA", visits: 305, coords: [37.7749, -122.4194] },
-          { name: "London", country: "UK", visits: 229, coords: [51.5074, -0.1278] },
-          { name: "Tokyo", country: "Japan", visits: 152, coords: [35.6762, 139.6503] },
-          { name: "New York", country: "USA", visits: 184, coords: [40.7128, -74.0060] },
-          { name: "Beijing", country: "China", visits: 142, coords: [39.9042, 116.4074] }
-        ];
+      // 为主要城市添加标记和弹出窗口
+      const cityMarkers = [
+        { name: "San Francisco", country: "USA", visits: 305, coords: [37.7749, -122.4194] },
+        { name: "London", country: "UK", visits: 229, coords: [51.5074, -0.1278] },
+        { name: "Tokyo", country: "Japan", visits: 152, coords: [35.6762, 139.6503] },
+        { name: "New York", country: "USA", visits: 184, coords: [40.7128, -74.0060] },
+        { name: "Beijing", country: "China", visits: 142, coords: [39.9042, 116.4074] }
+      ];
+      
+      cityMarkers.forEach(city => {
+        const marker = L.circleMarker(city.coords, {
+          radius: 5,
+          color: '#48BB78',
+          fillColor: '#48BB78',
+          fillOpacity: 0.8
+        }).addTo(map);
         
-        cityMarkers.forEach(city => {
-          const marker = L.circleMarker(city.coords, {
-            radius: 5,
-            color: '#48BB78',
-            fillColor: '#48BB78',
-            fillOpacity: 0.8
-          }).addTo(map);
-          
-          // 使用延迟绑定工具提示，减少初始渲染负担
-          setTimeout(() => {
-            marker.bindTooltip(
-              `<div class="tooltip-info">
-                <strong>${city.name}, ${city.country}</strong><br>
-                Visitors: ${city.visits}
-              </div>`,
-              { className: 'custom-tooltip' }
-            );
-          }, 500);
-        });
-      }
+        marker.bindTooltip(
+          `<div class="tooltip-info">
+            <strong>${city.name}, ${city.country}</strong><br>
+            Visitors: ${city.visits}
+          </div>`,
+          { className: 'custom-tooltip' }
+        );
+      });
       
       // 更新统计数据显示
       async function updateStatsDisplay() {
@@ -511,7 +529,7 @@
       
       // 响应窗口大小变化
       window.addEventListener('resize', function() {
-        if (map) map.invalidateSize();
+        map.invalidateSize();
       });
       
       // 管理面板功能
@@ -589,151 +607,21 @@
         }
       });
       
-      // 初始化步骤 - 使用时间分片处理，分散加载负担
-      setTimeout(() => checkFirebaseStatus(), 100);
+      // 初始化加载热图数据和统计信息
+      loadHeatmapData();
+      updateStatsDisplay();
+      checkFirebaseStatus();
       
-      setTimeout(() => {
-        if (map) loadHeatmapData(); 
-        else setTimeout(loadHeatmapData, 500);
-      }, 300);
-      
-      setTimeout(() => {
-        if (map) addCityMarkers();
-        else setTimeout(addCityMarkers, 500);
-      }, 600);
-      
-      setTimeout(() => updateStatsDisplay(), 800);
-      
-      // 最后加载访客位置数据，这通常是最耗时的操作
-      setTimeout(() => {
-        if (map) {
-          map.whenReady(() => {
-            setTimeout(() => {
-              getVisitorLocation();
-            }, 500);
-          });
-        } else {
-          setTimeout(() => {
-            getVisitorLocation();
-          }, 1500);
-        }
-      }, 1000);
+      // 加载地图后获取访客位置
+      map.whenReady(function() {
+        setTimeout(() => {
+          getVisitorLocation();
+        }, 1000);
+      });
     }
     
-    // 添加骨架屏样式
-    document.addEventListener('DOMContentLoaded', function() {
-      const style = document.createElement('style');
-      style.textContent = `
-        .skeleton-loading {
-          animation: skeleton-loading 1.5s ease infinite;
-          background: linear-gradient(90deg, rgba(72, 187, 120, 0.2), rgba(72, 187, 120, 0.3), rgba(72, 187, 120, 0.2));
-          background-size: 200% 100%;
-          border-radius: 4px;
-        }
-        
-        @keyframes skeleton-loading {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-      `;
-      document.head.appendChild(style);
-    });
+    // 当DOM加载完成时初始化
+    document.addEventListener('DOMContentLoaded', initializeMapAndVisitors);
   </script>
-</head>
-<body>
-  <div class="rounded-2xl p-6 md:p-8">
-    <h2 class="text-xl font-bold mb-6 flex items-center">
-      <i class="ph-bold ph-globe mr-2"></i>
-      Visitor Geography
-      <span class="ml-2 text-xs bg-amber-700 text-amber-200 px-2 py-1 rounded-full flex items-center">
-        <i class="ph-bold ph-flame firebase-icon mr-1"></i>Firebase
-      </span>
-    </h2>
-    
-    <!-- 管理按钮 -->
-    <button id="admin-button" class="admin-button" title="管理访客数据">
-      <i class="ph-bold ph-gear"></i>
-    </button>
-    
-    <!-- 管理对话框 -->
-    <div id="admin-modal" class="modal">
-      <div class="modal-content">
-        <h3 class="text-lg font-bold mb-4 flex items-center">
-          <i class="ph-bold ph-flame firebase-icon mr-2"></i>
-          Firebase 访客数据管理
-        </h3>
-        <div class="space-y-4">
-          <div class="text-sm p-2 bg-gray-800 rounded">
-            <div class="flex items-center mb-2">
-              <span class="status-indicator" id="firebase-status"></span>
-              <span class="font-medium" id="connection-status">检查 Firebase 连接状态...</span>
-            </div>
-            <p id="config-details" class="text-xs text-gray-400"></p>
-          </div>
-          
-          <div class="text-sm text-gray-300">
-            <p>当前存储的访客数据:</p>
-            <p id="data-summary">加载中...</p>
-          </div>
-          
-          <div class="flex gap-2">
-            <button id="export-data" class="bg-blue-600 text-white px-3 py-1 rounded text-sm">导出数据</button>
-            <button id="clear-data" class="bg-red-600 text-white px-3 py-1 rounded text-sm">清除数据</button>
-            <button id="close-modal" class="bg-gray-600 text-white px-3 py-1 rounded text-sm">关闭</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Firebase配置警告 -->
-    <div id="firebase-warning" class="hidden mb-4 p-3 bg-red-900 text-white rounded-md">
-      <p class="font-medium flex items-center">
-        <i class="ph-bold ph-warning-circle mr-2"></i>
-        Firebase 未正确配置
-      </p>
-      <p class="text-sm mt-1">
-        请在 <code class="bg-red-800 px-1 rounded">components/firebase-config.js</code> 中设置您的 Firebase 项目配置。
-      </p>
-    </div>
-    
-    <!-- Map container -->
-    <div class="relative">
-      <div id="map-container" class="mb-4"></div>
-      <div id="loading-overlay" class="loading-overlay">
-        <div class="spinner"></div>
-      </div>
-    </div>
-    
-    <!-- Stats row -->
-    <div class="grid grid-cols-3 gap-3 mb-4">
-      <div class="stat-card">
-        <div class="stat-value" id="total-visitors">0</div>
-        <div class="stat-label">Total Visitors</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="total-countries">0</div>
-        <div class="stat-label">Countries</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="total-cities">0</div>
-        <div class="stat-label">Cities</div>
-      </div>
-    </div>
-    
-    <!-- Your visitor info -->
-    <div class="visitor-info mb-4" id="your-location">
-      <h3 class="text-sm font-bold mb-1">Your Location:</h3>
-      <p class="text-sm" id="visitor-location-text">
-        <i class="ph-bold ph-map-pin mr-1"></i> 
-        Detecting your location...
-      </p>
-    </div>
-    
-    <!-- Top locations -->
-    <h3 class="text-md font-bold mb-2">Top Visitor Locations</h3>
-    <div id="top-cities-container" class="space-y-2">
-      <!-- 顶部城市将从JavaScript动态填充 -->
-    </div>
-  </div>
 </body>
 </html>
