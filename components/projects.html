@@ -4,11 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Projects Component</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/bold/style.css" />
+  <!-- 预连接到关键资源，减少DNS查询时间 -->
+  <link rel="preconnect" href="https://cdn.tailwindcss.com">
+  <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- 关键CSS内联，减少阻塞渲染的外部请求 -->
   <style>
     :root {
       --primary: #2D3748;
@@ -18,7 +20,7 @@
     }
     
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: sans-serif; /* 使用默认字体，加快初始渲染 */
       background-color: transparent;
       color: var(--light);
       margin: 0;
@@ -27,7 +29,7 @@
     }
     
     h1, h2, h3, h4 {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: monospace; /* 使用默认等宽字体，加快初始渲染 */
     }
     
     .project-card {
@@ -56,16 +58,79 @@
       outline: 3px solid var(--accent);
       outline-offset: 2px;
     }
+    
+    /* 基础网格样式 - 重要的结构样式内联 */
+    .rounded-2xl { border-radius: 1rem; }
+    .p-6 { padding: 1.5rem; }
+    .mb-6 { margin-bottom: 1.5rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mr-2 { margin-right: 0.5rem; }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .text-xl { font-size: 1.25rem; }
+    .text-lg { font-size: 1.125rem; }
+    .text-sm { font-size: 0.875rem; }
+    .font-bold { font-weight: 700; }
+    .text-2xl { font-size: 1.5rem; }
+    .text-gray-300 { color: #D1D5DB; }
+    .text-gray-400 { color: #9CA3AF; }
+    .text-white { color: #FFFFFF; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-6 { gap: 1.5rem; }
+    .flex-wrap { flex-wrap: wrap; }
+    .transition-colors { transition-property: color; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+    .hover\:text-white:hover { color: #FFFFFF; }
+    
+    /* 响应式布局 */
+    .grid { display: grid; }
+    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    
+    @media (min-width: 768px) {
+      .md\:p-8 { padding: 2rem; }
+      .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
   </style>
+  
+  <!-- 非关键资源延迟加载 -->
   <script>
+    // 加载非关键CSS和字体
+    window.addEventListener('DOMContentLoaded', function() {
+      // 加载Tailwind CSS（延迟加载）
+      const tailwindScript = document.createElement('script');
+      tailwindScript.src = "https://cdn.tailwindcss.com";
+      document.head.appendChild(tailwindScript);
+      
+      // 加载图标（延迟加载）
+      const iconsLink = document.createElement('link');
+      iconsLink.rel = "stylesheet";
+      iconsLink.href = "https://unpkg.com/@phosphor-icons/web@2.0.3/src/bold/style.css";
+      document.head.appendChild(iconsLink);
+      
+      // 加载字体（延迟加载）
+      const fontsLink = document.createElement('link');
+      fontsLink.rel = "stylesheet";
+      fontsLink.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap";
+      document.head.appendChild(fontsLink);
+      
+      // 字体加载后应用
+      fontsLink.onload = function() {
+        document.body.style.fontFamily = "'Inter', sans-serif";
+        
+        const headings = document.querySelectorAll('h1, h2, h3, h4');
+        headings.forEach(heading => {
+          heading.style.fontFamily = "'JetBrains Mono', monospace";
+        });
+      };
+    });
+    
     // 当文档加载完成后通知父窗口调整iframe高度
     window.addEventListener('load', function() {
       if (window.parent) {
-        // 延迟一点时间确保所有内容已经渲染
-        setTimeout(function() {
-          // 触发父窗口中的resize事件来调整iframe高度
-          window.parent.dispatchEvent(new Event('resize'));
-        }, 100);
+        // 立即通知
+        window.parent.dispatchEvent(new Event('resize'));
+        window.parent.dispatchEvent(new Event('iframe-loaded'));
       }
     });
   </script>

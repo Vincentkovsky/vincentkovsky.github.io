@@ -149,6 +149,21 @@
       background: transparent;
       overflow: hidden;
     }
+
+    /* 骨架屏动画 */
+    .skeletal-loading {
+      animation: skeleton-loading 1.5s ease infinite;
+      background: linear-gradient(90deg, 
+        rgba(45, 55, 72, 0.7), 
+        rgba(45, 55, 72, 0.9), 
+        rgba(45, 55, 72, 0.7));
+      background-size: 200% 100%;
+    }
+    
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
   </style>
 </head>
 <body class="bg-[#1A202C] min-h-screen p-4 md:p-12">
@@ -171,32 +186,113 @@
   <div id="main-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-7xl mx-auto">
     <!-- BioCard -->
     <div id="about" class="neumorphic-card">
-      <iframe src="components/bio.html" id="bio-frame" scrolling="no"></iframe>
+      <div class="pre-render p-6 md:p-8">
+        <h2 class="text-xl font-bold mb-6 flex items-center">
+          <span class="skeletal-loading w-6 h-6 mr-2 rounded"></span>
+          <span class="skeletal-loading w-32 h-6 rounded"></span>
+        </h2>
+        <div class="skeletal-loading w-full h-24 rounded mb-4"></div>
+        <div class="skeletal-loading w-3/4 h-4 rounded mb-3"></div>
+        <div class="skeletal-loading w-full h-4 rounded mb-3"></div>
+        <div class="skeletal-loading w-5/6 h-4 rounded"></div>
+      </div>
+      <iframe data-src="components/bio.html" id="bio-frame" scrolling="no" style="display:none"></iframe>
     </div>
 
     <!-- SkillRadar -->
     <div id="skills" class="neumorphic-card">
-      <iframe src="components/skills.html" id="skills-frame" scrolling="no"></iframe>
+      <div class="pre-render p-6 md:p-8">
+        <h2 class="text-xl font-bold mb-6 flex items-center">
+          <span class="skeletal-loading w-6 h-6 mr-2 rounded"></span>
+          <span class="skeletal-loading w-32 h-6 rounded"></span>
+        </h2>
+        <div class="flex flex-wrap gap-2 mb-6">
+          <span class="skeletal-loading w-16 h-6 rounded-full"></span>
+          <span class="skeletal-loading w-24 h-6 rounded-full"></span>
+          <span class="skeletal-loading w-20 h-6 rounded-full"></span>
+        </div>
+        <div class="space-y-4">
+          <div class="w-full">
+            <div class="flex justify-between mb-1">
+              <span class="skeletal-loading w-24 h-4 rounded"></span>
+              <span class="skeletal-loading w-8 h-4 rounded"></span>
+            </div>
+            <div class="skeletal-loading w-full h-2 rounded"></div>
+          </div>
+          <div class="w-full">
+            <div class="flex justify-between mb-1">
+              <span class="skeletal-loading w-24 h-4 rounded"></span>
+              <span class="skeletal-loading w-8 h-4 rounded"></span>
+            </div>
+            <div class="skeletal-loading w-full h-2 rounded"></div>
+          </div>
+        </div>
+      </div>
+      <iframe data-src="components/skills.html" id="skills-frame" scrolling="no" style="display:none"></iframe>
     </div>
 
     <!-- ProjectMatrix -->
     <div id="projects" class="neumorphic-card col-span-1 md:col-span-2">
-      <iframe src="components/projects.html" id="projects-frame" scrolling="no"></iframe>
+      <div class="pre-render p-6 md:p-8">
+        <h2 class="text-xl font-bold mb-6 flex items-center">
+          <span class="skeletal-loading w-6 h-6 mr-2 rounded"></span>
+          <span class="skeletal-loading w-40 h-6 rounded"></span>
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="skeletal-loading w-full h-48 rounded"></div>
+          <div class="skeletal-loading w-full h-48 rounded"></div>
+        </div>
+      </div>
+      <iframe data-src="components/projects.html" id="projects-frame" scrolling="no" style="display:none"></iframe>
     </div>
     
     <!-- CodeTimeline -->
     <div id="experience" class="neumorphic-card">
-      <iframe src="components/experience.html" id="experience-frame" scrolling="no"></iframe>
+      <div class="pre-render p-6 md:p-8">
+        <h2 class="text-xl font-bold mb-6 flex items-center">
+          <span class="skeletal-loading w-6 h-6 mr-2 rounded"></span>
+          <span class="skeletal-loading w-32 h-6 rounded"></span>
+        </h2>
+        <div class="space-y-6">
+          <div class="skeletal-loading w-full h-24 rounded"></div>
+          <div class="skeletal-loading w-full h-24 rounded"></div>
+        </div>
+      </div>
+      <iframe data-src="components/experience.html" id="experience-frame" scrolling="no" style="display:none"></iframe>
     </div>
     
     <!-- VisitorsMap -->
     <div id="visitors-map" class="neumorphic-card">
-      <iframe src="components/visitors-map.html" id="visitors-map-frame" scrolling="no"></iframe>
+      <div class="pre-render p-6 md:p-8">
+        <h2 class="text-xl font-bold mb-6 flex items-center">
+          <span class="skeletal-loading w-6 h-6 mr-2 rounded"></span>
+          <span class="skeletal-loading w-40 h-6 rounded"></span>
+        </h2>
+        <div class="skeletal-loading w-full h-[300px] rounded mb-4"></div>
+        <div class="grid grid-cols-3 gap-3 mb-4">
+          <div class="skeletal-loading w-full h-16 rounded"></div>
+          <div class="skeletal-loading w-full h-16 rounded"></div>
+          <div class="skeletal-loading w-full h-16 rounded"></div>
+        </div>
+      </div>
+      <iframe data-src="components/visitors-map.html" id="visitors-map-frame" scrolling="no" style="display:none"></iframe>
     </div>
     
     <!-- ContactPanel -->
     <div id="contact" class="neumorphic-card col-span-1 md:col-span-2">
-      <iframe src="components/contact.html" id="contact-frame" scrolling="no"></iframe>
+      <div class="pre-render p-6 md:p-8">
+        <h2 class="text-xl font-bold mb-6 flex items-center">
+          <span class="skeletal-loading w-6 h-6 mr-2 rounded"></span>
+          <span class="skeletal-loading w-32 h-6 rounded"></span>
+        </h2>
+        <div class="skeletal-loading w-full h-[100px] rounded mb-4"></div>
+        <div class="flex gap-4 justify-center">
+          <span class="skeletal-loading w-10 h-10 rounded-full"></span>
+          <span class="skeletal-loading w-10 h-10 rounded-full"></span>
+          <span class="skeletal-loading w-10 h-10 rounded-full"></span>
+        </div>
+      </div>
+      <iframe data-src="components/contact.html" id="contact-frame" scrolling="no" style="display:none"></iframe>
     </div>
   </div>
   
@@ -207,7 +303,7 @@
 
   <script>
     // 等待页面加载完成
-    window.addEventListener('load', function() {
+    document.addEventListener('DOMContentLoaded', function() {
       // 为每个iframe调整高度的函数
       function resizeIframe(iframe) {
         try {
@@ -220,28 +316,137 @@
         }
       }
 
-      // 获取所有iframe元素
+      // 获取所有iframe元素和骨架屏元素
       const iframes = document.querySelectorAll('iframe');
+      const preRenders = document.querySelectorAll('.pre-render');
       
-      // 对每个iframe进行调整
-      iframes.forEach(iframe => {
-        // 当iframe加载完成时调整高度
-        iframe.onload = function() {
-          resizeIframe(iframe);
+      // 优化iframe加载顺序和性能
+      function loadIframe(iframe, preRender, delay = 0) {
+        setTimeout(() => {
+          // 设置iframe的src属性，触发加载
+          if(iframe.dataset.src) {
+            iframe.src = iframe.dataset.src;
+          }
+          
+          // 当iframe加载完成时调整高度并隐藏骨架屏
+          iframe.onload = function() {
+            // 显示iframe
+            iframe.style.display = 'block';
+            
+            // 隐藏骨架屏
+            if (preRender) {
+              preRender.style.display = 'none';
+            }
+            
+            // 调整iframe高度
+            resizeIframe(iframe);
+            
+            // 通知父窗口已加载完成
+            window.dispatchEvent(new Event('iframe-loaded'));
+          };
+        }, delay);
+      }
+      
+      // 检测元素是否在视口中
+      function isInViewport(element) {
+        const rect = element.getBoundingClientRect();
+        return (
+          rect.top >= -300 && // 稍微扩大检测范围，提前加载
+          rect.left >= 0 &&
+          rect.bottom <= (window.innerHeight + 300) && // 稍微扩大检测范围，提前加载
+          rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
+      }
+      
+      // 创建交叉观察器
+      if ('IntersectionObserver' in window) {
+        const options = {
+          root: null, // 使用视口作为根元素
+          rootMargin: '300px 0px', // 扩大检测范围，提前加载
+          threshold: 0.1
         };
         
-        // 如果iframe已经加载完成，立即调整高度
-        if (iframe.contentWindow.document.readyState === 'complete') {
-          resizeIframe(iframe);
-        }
-      });
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const cardContainer = entry.target;
+              const iframe = cardContainer.querySelector('iframe');
+              const preRender = cardContainer.querySelector('.pre-render');
+              
+              if (iframe && iframe.dataset.src && !iframe.src) {
+                loadIframe(iframe, preRender);
+              }
+              
+              // 已加载的iframe不再需要观察
+              observer.unobserve(cardContainer);
+            }
+          });
+        }, options);
+        
+        // 对每个卡片容器进行观察，而不是单独的iframe
+        document.querySelectorAll('.neumorphic-card').forEach(card => {
+          observer.observe(card);
+        });
+        
+        // 立即加载首屏可见的iframe
+        document.querySelectorAll('.neumorphic-card').forEach(card => {
+          if (isInViewport(card)) {
+            const iframe = card.querySelector('iframe');
+            const preRender = card.querySelector('.pre-render');
+            
+            if (iframe && iframe.dataset.src && !iframe.src) {
+              // 优先加载首屏内容
+              loadIframe(iframe, preRender, 0);
+            }
+            
+            // 已处理的卡片不再需要观察
+            observer.unobserve(card);
+          }
+        });
+      } else {
+        // 回退方案：为不支持IntersectionObserver的浏览器逐步加载iframe
+        document.querySelectorAll('.neumorphic-card').forEach((card, index) => {
+          const iframe = card.querySelector('iframe');
+          const preRender = card.querySelector('.pre-render');
+          
+          if (iframe && iframe.dataset.src) {
+            loadIframe(iframe, preRender, index * 200); // 每个iframe延迟200ms加载
+          }
+        });
+      }
       
       // 窗口大小改变时重新调整所有iframe
       window.addEventListener('resize', function() {
         iframes.forEach(iframe => {
-          resizeIframe(iframe);
+          if (iframe.contentWindow && iframe.style.display !== 'none') {
+            resizeIframe(iframe);
+          }
         });
       });
+      
+      // 当任何iframe内容发生变化时，重新调整大小
+      window.addEventListener('iframe-loaded', function() {
+        iframes.forEach(iframe => {
+          if (iframe.contentWindow && iframe.style.display !== 'none') {
+            resizeIframe(iframe);
+          }
+        });
+      });
+      
+      // 添加记录页面加载性能的代码
+      if (window.performance) {
+        // 获取性能指标
+        window.addEventListener('load', function() {
+          setTimeout(function() {
+            const perfData = window.performance.timing;
+            const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+            const domReadyTime = perfData.domComplete - perfData.domLoading;
+            
+            console.log('页面加载总时间:', pageLoadTime + 'ms');
+            console.log('DOM处理时间:', domReadyTime + 'ms');
+          }, 0);
+        });
+      }
     });
   </script>
 </body>
