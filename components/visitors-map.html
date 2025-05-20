@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visitors Map Component</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/bold/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+        crossorigin="" />
+  <!-- Leaflet JavaScript -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+          crossorigin=""></script>
+  <!-- Leaflet Heatmap Plugin -->
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <style>
+    :root {
+      --primary: #2D3748;
+      --accent: #48BB78;
+      --dark: #1A202C;
+      --light: #E2E8F0;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: transparent;
+      color: var(--light);
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    h1, h2, h3, h4 {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    #map-container {
+      width: 100%;
+      height: 300px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .stat-card {
+      background-color: rgba(45, 55, 72, 0.7);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+    }
+    
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: var(--accent);
+    }
+    
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--light);
+      opacity: 0.8;
+    }
+    
+    .tooltip-info {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 6px 10px;
+      background-color: rgba(45, 55, 72, 0.9);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      color: var(--light);
+    }
+    
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(26, 32, 44, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      border-radius: 8px;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(72, 187, 120, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--accent);
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .visitor-info {
+      padding: 0.75rem;
+      background-color: rgba(45, 55, 72, 0.5);
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+      border-left: 3px solid var(--accent);
+    }
+    
+    /* 管理面板按钮 */
+    .admin-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: rgba(45, 55, 72, 0.7);
+      color: var(--light);
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      z-index: 900;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+    
+    .admin-button:hover {
+      opacity: 1;
+    }
+    
+    /* 弹出对话框 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background-color: var(--primary);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    /* 配置状态指示器 */
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+    
+    .status-indicator.connected {
+      background-color: #48BB78;
+    }
+    
+    .status-indicator.not-configured {
+      background-color: #F56565;
+    }
+    
+    /* 火焰图标动画 */
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    
+    .firebase-icon {
+      color: #FFCA28;
+      animation: flicker 3s infinite;
+    }
+  </style>
+  <script>
+    // 当文档加载完成后通知父窗口调整iframe高度
+    window.addEventListener('load', function() {
+      if (window.parent) {
+        // 延迟一点时间确保所有内容已经渲染
+        setTimeout(function() {
+          // 触发父窗口中的resize事件来调整iframe高度
+          window.parent.dispatchEvent(new Event('resize'));
+        }, 500);
+      }
+    });
+  </script>
+  <!-- 导入Firebase模块 -->
+  <script type="module">
+    import FirebaseVisitorStorage from './firebase-config.js';
+    
+    // 将Firebase存储暴露给全局作用域
+    window.FirebaseVisitorStorage = FirebaseVisitorStorage;
+  </script>
+</head>
+<body>
+  <div class="rounded-2xl p-6 md:p-8">
+    <h2 class="text-xl font-bold mb-6 flex items-center">
+      <i class="ph-bold ph-globe mr-2"></i>
+      Visitor Geography
+      <span class="ml-2 text-xs bg-amber-700 text-amber-200 px-2 py-1 rounded-full flex items-center">
+        <i class="ph-bold ph-flame firebase-icon mr-1"></i>Firebase
+      </span>
+    </h2>
+    
+    <!-- 管理按钮 -->
+    <button id="admin-button" class="admin-button" title="管理访客数据">
+      <i class="ph-bold ph-gear"></i>
+    </button>
+    
+    <!-- 管理对话框 -->
+    <div id="admin-modal" class="modal">
+      <div class="modal-content">
+        <h3 class="text-lg font-bold mb-4 flex items-center">
+          <i class="ph-bold ph-flame firebase-icon mr-2"></i>
+          Firebase 访客数据管理
+        </h3>
+        <div class="space-y-4">
+          <div class="text-sm p-2 bg-gray-800 rounded">
+            <div class="flex items-center mb-2">
+              <span class="status-indicator" id="firebase-status"></span>
+              <span class="font-medium" id="connection-status">检查 Firebase 连接状态...</span>
+            </div>
+            <p id="config-details" class="text-xs text-gray-400"></p>
+          </div>
+          
+          <div class="text-sm text-gray-300">
+            <p>当前存储的访客数据:</p>
+            <p id="data-summary">加载中...</p>
+          </div>
+          
+          <div class="flex gap-2">
+            <button id="export-data" class="bg-blue-600 text-white px-3 py-1 rounded text-sm">导出数据</button>
+            <button id="clear-data" class="bg-red-600 text-white px-3 py-1 rounded text-sm">清除数据</button>
+            <button id="close-modal" class="bg-gray-600 text-white px-3 py-1 rounded text-sm">关闭</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Firebase配置警告 -->
+    <div id="firebase-warning" class="hidden mb-4 p-3 bg-red-900 text-white rounded-md">
+      <p class="font-medium flex items-center">
+        <i class="ph-bold ph-warning-circle mr-2"></i>
+        Firebase 未正确配置
+      </p>
+      <p class="text-sm mt-1">
+        请在 <code class="bg-red-800 px-1 rounded">components/firebase-config.js</code> 中设置您的 Firebase 项目配置。
+      </p>
+    </div>
+    
+    <!-- Map container -->
+    <div class="relative">
+      <div id="map-container" class="mb-4"></div>
+      <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+      </div>
+    </div>
+    
+    <!-- Stats row -->
+    <div class="grid grid-cols-3 gap-3 mb-4">
+      <div class="stat-card">
+        <div class="stat-value" id="total-visitors">0</div>
+        <div class="stat-label">Total Visitors</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="total-countries">0</div>
+        <div class="stat-label">Countries</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="total-cities">0</div>
+        <div class="stat-label">Cities</div>
+      </div>
+    </div>
+    
+    <!-- Your visitor info -->
+    <div class="visitor-info mb-4" id="your-location">
+      <h3 class="text-sm font-bold mb-1">Your Location:</h3>
+      <p class="text-sm" id="visitor-location-text">
+        <i class="ph-bold ph-map-pin mr-1"></i> 
+        Detecting your location...
+      </p>
+    </div>
+    
+    <!-- Top locations -->
+    <h3 class="text-md font-bold mb-2">Top Visitor Locations</h3>
+    <div id="top-cities-container" class="space-y-2">
+      <!-- 顶部城市将从JavaScript动态填充 -->
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 加载中的状态
+      const loadingOverlay = document.getElementById('loading-overlay');
+      const firebaseWarning = document.getElementById('firebase-warning');
+      
+      // 检查Firebase是否已正确配置
+      function checkFirebaseStatus() {
+        const statusIndicator = document.getElementById('firebase-status');
+        const connectionStatus = document.getElementById('connection-status');
+        const configDetails = document.getElementById('config-details');
+        
+        if (FirebaseVisitorStorage.isConfigured()) {
+          statusIndicator.classList.add('connected');
+          statusIndicator.classList.remove('not-configured');
+          connectionStatus.textContent = 'Firebase 已连接';
+          configDetails.textContent = '访客数据将安全地存储在您的Firebase项目中。';
+          firebaseWarning.classList.add('hidden');
+        } else {
+          statusIndicator.classList.add('not-configured');
+          statusIndicator.classList.remove('connected');
+          connectionStatus.textContent = 'Firebase 未配置';
+          configDetails.textContent = '请在firebase-config.js文件中设置您的Firebase项目配置。';
+          firebaseWarning.classList.remove('hidden');
+        }
+      }
+      
+      // 初始化地图
+      const map = L.map('map-container').setView([20, 0], 2);
+      
+      // 使用暗色地图风格
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(map);
+      
+      // 热力图层
+      let heat;
+      
+      // 加载热图数据
+      async function loadHeatmapData() {
+        try {
+          // 如果已有热图层，先移除
+          if (heat) {
+            map.removeLayer(heat);
+          }
+          
+          // 从 Firebase 获取热图数据
+          const heatmapData = await FirebaseVisitorStorage.getHeatmapData();
+          
+          // 创建热力图层
+          heat = L.heatLayer(heatmapData, {
+            radius: 15,
+            blur: 15,
+            maxZoom: 10,
+            gradient: {
+              0.1: '#4ADE80',  // 浅绿色
+              0.3: '#22C55E',  // 中绿色
+              0.5: '#16A34A',  // 深绿色
+              0.7: '#15803D',  // 更深绿色
+              1.0: '#14532D'   // 最深绿色
+            }
+          }).addTo(map);
+        } catch (error) {
+          console.error('Error loading heatmap data:', error);
+        }
+      }
+      
+      // 为主要城市添加标记和弹出窗口
+      const cityMarkers = [
+        { name: "San Francisco", country: "USA", visits: 305, coords: [37.7749, -122.4194] },
+        { name: "London", country: "UK", visits: 229, coords: [51.5074, -0.1278] },
+        { name: "Tokyo", country: "Japan", visits: 152, coords: [35.6762, 139.6503] },
+        { name: "New York", country: "USA", visits: 184, coords: [40.7128, -74.0060] },
+        { name: "Beijing", country: "China", visits: 142, coords: [39.9042, 116.4074] }
+      ];
+      
+      cityMarkers.forEach(city => {
+        const marker = L.circleMarker(city.coords, {
+          radius: 5,
+          color: '#48BB78',
+          fillColor: '#48BB78',
+          fillOpacity: 0.8
+        }).addTo(map);
+        
+        marker.bindTooltip(
+          `<div class="tooltip-info">
+            <strong>${city.name}, ${city.country}</strong><br>
+            Visitors: ${city.visits}
+          </div>`,
+          { className: 'custom-tooltip' }
+        );
+      });
+      
+      // 更新统计数据显示
+      async function updateStatsDisplay() {
+        try {
+          // 从 Firebase 获取统计数据
+          const stats = await FirebaseVisitorStorage.getStats();
+          
+          document.getElementById('total-visitors').textContent = stats.totalVisitors;
+          document.getElementById('total-countries').textContent = stats.uniqueCountries;
+          document.getElementById('total-cities').textContent = stats.uniqueCities;
+          
+          // 更新顶部城市列表
+          const topCitiesContainer = document.getElementById('top-cities-container');
+          topCitiesContainer.innerHTML = ''; // 清空现有内容
+          
+          if (stats.topCities && stats.topCities.length > 0) {
+            stats.topCities.forEach(city => {
+              const cityElement = document.createElement('div');
+              cityElement.innerHTML = `
+                <div class="flex justify-between items-center text-sm">
+                  <span>${city.name}</span>
+                  <span class="text-[#48BB78]">${Math.round(city.percentage)}%</span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-1.5">
+                  <div class="bg-[#48BB78] h-1.5 rounded-full" style="width: ${Math.round(city.percentage)}%"></div>
+                </div>
+              `;
+              topCitiesContainer.appendChild(cityElement);
+            });
+          } else {
+            // 如果没有访客数据，显示默认城市
+            const defaultCities = [
+              { name: "San Francisco, USA", percentage: 24 },
+              { name: "London, UK", percentage: 18 },
+              { name: "Tokyo, Japan", percentage: 12 }
+            ];
+            
+            defaultCities.forEach(city => {
+              const cityElement = document.createElement('div');
+              cityElement.innerHTML = `
+                <div class="flex justify-between items-center text-sm">
+                  <span>${city.name}</span>
+                  <span class="text-[#48BB78]">${city.percentage}%</span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-1.5">
+                  <div class="bg-[#48BB78] h-1.5 rounded-full" style="width: ${city.percentage}%"></div>
+                </div>
+              `;
+              topCitiesContainer.appendChild(cityElement);
+            });
+          }
+        } catch (error) {
+          console.error('Error updating stats display:', error);
+        }
+      }
+      
+      // 获取访客IP并解析地理位置信息
+      async function getVisitorLocation() {
+        try {
+          // 使用免费的IP地理位置API
+          const response = await fetch('https://ipapi.co/json/');
+          const data = await response.json();
+          
+          if (data && data.latitude && data.longitude) {
+            // 更新访客位置信息
+            document.getElementById('visitor-location-text').innerHTML = 
+              `<i class="ph-bold ph-map-pin mr-1"></i> 
+               ${data.city}, ${data.country_name} (${data.ip})`;
+            
+            // 在地图上添加访客位置标记
+            const visitorMarker = L.marker([data.latitude, data.longitude], {
+              icon: L.divIcon({
+                html: '<i class="ph-bold ph-user-circle text-2xl text-[#48BB78]"></i>',
+                className: 'visitor-marker',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+              })
+            }).addTo(map);
+            
+            visitorMarker.bindTooltip('Your location', {
+              permanent: true,
+              direction: 'top',
+              offset: [0, -10]
+            });
+            
+            // 聚焦到访客位置
+            map.setView([data.latitude, data.longitude], 4);
+            
+            // 将当前访客添加到热力图数据中
+            if (heat) {
+              heat.addLatLng([data.latitude, data.longitude, 0.5]);
+            }
+            
+            // 保存访客数据到 Firebase
+            await FirebaseVisitorStorage.addVisitor(data);
+            
+            // 更新统计显示
+            updateStatsDisplay();
+          } else {
+            throw new Error('无法获取位置数据');
+          }
+        } catch (error) {
+          console.error('获取位置信息时出错:', error);
+          document.getElementById('visitor-location-text').innerHTML = 
+            '<i class="ph-bold ph-warning mr-1"></i> 无法检测您的位置信息';
+            
+          // 即使出错，仍然更新统计信息
+          updateStatsDisplay();
+        } finally {
+          // 隐藏加载中的状态
+          loadingOverlay.style.display = 'none';
+          
+          // 通知父窗口调整iframe高度
+          if (window.parent) {
+            window.parent.dispatchEvent(new Event('resize'));
+          }
+        }
+      }
+      
+      // 响应窗口大小变化
+      window.addEventListener('resize', function() {
+        map.invalidateSize();
+      });
+      
+      // 管理面板功能
+      const adminButton = document.getElementById('admin-button');
+      const adminModal = document.getElementById('admin-modal');
+      const closeModal = document.getElementById('close-modal');
+      const exportData = document.getElementById('export-data');
+      const clearData = document.getElementById('clear-data');
+      const dataSummary = document.getElementById('data-summary');
+      
+      adminButton.addEventListener('click', async function() {
+        // 检查Firebase状态
+        checkFirebaseStatus();
+        
+        try {
+          // 更新数据摘要
+          const allVisitors = await FirebaseVisitorStorage.getAllVisitors();
+          const stats = await FirebaseVisitorStorage.getStats();
+          
+          if (allVisitors.length > 0) {
+            dataSummary.innerHTML = `
+              <div class="mb-1">访客总数: <span class="font-medium text-white">${stats.totalVisitors}</span></div>
+              <div class="mb-1">独立国家: <span class="font-medium text-white">${stats.uniqueCountries}</span></div>
+              <div class="mb-1">独立城市: <span class="font-medium text-white">${stats.uniqueCities}</span></div>
+              <div>最近访问: <span class="font-medium text-white">${new Date(allVisitors[0].timestamp).toLocaleString()}</span></div>
+            `;
+          } else {
+            dataSummary.textContent = "暂无访客数据";
+          }
+        } catch (error) {
+          console.error('Error fetching admin data:', error);
+          dataSummary.textContent = "无法加载访客数据，请检查Firebase配置";
+        }
+        
+        // 显示模态框
+        adminModal.style.display = 'flex';
+      });
+      
+      closeModal.addEventListener('click', function() {
+        adminModal.style.display = 'none';
+      });
+      
+      exportData.addEventListener('click', async function() {
+        try {
+          await FirebaseVisitorStorage.exportData();
+        } catch (error) {
+          console.error('Error exporting data:', error);
+          alert('无法导出数据，请确保Firebase已正确配置');
+        }
+      });
+      
+      clearData.addEventListener('click', async function() {
+        if (confirm('确定要清除所有访客数据吗？此操作无法撤销。')) {
+          try {
+            const success = await FirebaseVisitorStorage.clearData();
+            if (success) {
+              alert('数据已成功清除');
+              await loadHeatmapData();
+              await updateStatsDisplay();
+            } else {
+              alert('清除数据失败');
+            }
+          } catch (error) {
+            console.error('Error clearing data:', error);
+            alert('清除数据时发生错误，请确保Firebase已正确配置');
+          }
+          adminModal.style.display = 'none';
+        }
+      });
+      
+      // 当用户点击模态框外部时关闭它
+      adminModal.addEventListener('click', function(event) {
+        if (event.target === adminModal) {
+          adminModal.style.display = 'none';
+        }
+      });
+      
+      // 初始化加载热图数据和统计信息
+      loadHeatmapData();
+      updateStatsDisplay();
+      checkFirebaseStatus();
+      
+      // 加载地图后获取访客位置
+      map.whenReady(function() {
+        setTimeout(() => {
+          getVisitorLocation();
+        }, 1000);
+      });
+    });
+  </script>
+</body>
+</html>

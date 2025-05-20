@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vincent Jin | Developer Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/bold/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2D3748;
+      --accent: #48BB78;
+      --dark: #1A202C;
+      --light: #E2E8F0;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--dark);
+      color: var(--light);
+    }
+    
+    h1, h2, h3, h4 {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .neumorphic-card {
+      background: var(--primary);
+      box-shadow: 8px 8px 16px #1a202c, -8px -8px 16px #4a5568;
+      border-radius: 1rem;
+      transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+      overflow: hidden;
+    }
+    
+    .neumorphic-card:hover {
+      transform: translateY(-4px);
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      background: #2D3748;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #48BB78;
+      border-radius: 4px;
+    }
+    
+    /* Skill tag styling */
+    .skill-tag {
+      background: var(--primary);
+      color: var(--accent);
+      border-radius: 9999px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.875rem;
+      display: inline-block;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .skill-tag::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(72, 187, 120, 0.1),
+        rgba(72, 187, 120, 0.1) 5px,
+        rgba(72, 187, 120, 0.2) 5px,
+        rgba(72, 187, 120, 0.2) 10px
+      );
+      animation: flow 2s linear infinite;
+    }
+    
+    @keyframes flow {
+      0% {
+        left: -100%;
+      }
+      100% {
+        left: 100%;
+      }
+    }
+    
+    /* Skill bar styling */
+    .skill-bar {
+      margin-bottom: 1rem;
+    }
+    
+    .skill-bar .label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
+    }
+    
+    .skill-bar .progress {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .skill-bar .progress .fill {
+      height: 100%;
+      background: var(--accent);
+      position: relative;
+    }
+    
+    .skill-bar .progress .fill .glow {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: 5px;
+      background: rgba(255, 255, 255, 0.7);
+      filter: blur(3px);
+    }
+    
+    /* Responsive styling */
+    @media (max-width: 768px) {
+      #main-grid {
+        grid-template-columns: 1fr !important;
+      }
+      
+      .neumorphic-card {
+        box-shadow: 4px 4px 8px #1a202c, -4px -4px 8px #4a5568;
+      }
+    }
+
+    /* Focus states */
+    a:focus, button:focus {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+    
+    /* Iframe styling */
+    iframe {
+      border: none;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="bg-[#1A202C] min-h-screen p-4 md:p-12">
+  <header class="max-w-7xl mx-auto mb-8">
+    <div class="flex justify-between items-center">
+      <h1 class="text-2xl md:text-3xl font-bold">
+        <span class="text-[#48BB78]">Vincent</span>Jin
+      </h1>
+      <nav class="hidden md:flex gap-6">
+        <a href="#about" class="hover:text-[#48BB78] transition-colors">About</a>
+        <a href="#skills" class="hover:text-[#48BB78] transition-colors">Skills</a>
+        <a href="#projects" class="hover:text-[#48BB78] transition-colors">Projects</a>
+        <a href="#experience" class="hover:text-[#48BB78] transition-colors">Experience</a>
+        <a href="#visitors-map" class="hover:text-[#48BB78] transition-colors">Visitors Map</a>
+        <a href="#contact" class="hover:text-[#48BB78] transition-colors">Contact</a>
+      </nav>
+    </div>
+  </header>
+  
+  <div id="main-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-7xl mx-auto">
+    <!-- BioCard -->
+    <div id="about" class="neumorphic-card">
+      <iframe src="components/bio.html" id="bio-frame" scrolling="no"></iframe>
+    </div>
+
+    <!-- SkillRadar -->
+    <div id="skills" class="neumorphic-card">
+      <iframe src="components/skills.html" id="skills-frame" scrolling="no"></iframe>
+    </div>
+
+    <!-- ProjectMatrix -->
+    <div id="projects" class="neumorphic-card col-span-1 md:col-span-2">
+      <iframe src="components/projects.html" id="projects-frame" scrolling="no"></iframe>
+    </div>
+    
+    <!-- CodeTimeline -->
+    <div id="experience" class="neumorphic-card">
+      <iframe src="components/experience.html" id="experience-frame" scrolling="no"></iframe>
+    </div>
+    
+    <!-- VisitorsMap -->
+    <div id="visitors-map" class="neumorphic-card">
+      <iframe src="components/visitors-map.html" id="visitors-map-frame" scrolling="no"></iframe>
+    </div>
+    
+    <!-- ContactPanel -->
+    <div id="contact" class="neumorphic-card col-span-1 md:col-span-2">
+      <iframe src="components/contact.html" id="contact-frame" scrolling="no"></iframe>
+    </div>
+  </div>
+  
+  <footer class="mt-12 mb-6 text-center text-gray-400 text-sm max-w-7xl mx-auto">
+    <p>© 2023 Vincent Jin. All rights reserved.</p>
+    <p class="mt-2">Built with <span class="text-[#48BB78]">❤</span> using modern web technologies</p>
+  </footer>
+
+  <script>
+    // 等待页面加载完成
+    window.addEventListener('load', function() {
+      // 为每个iframe调整高度的函数
+      function resizeIframe(iframe) {
+        try {
+          // 获取iframe中的内容高度
+          const height = iframe.contentWindow.document.body.scrollHeight;
+          // 设置iframe的高度
+          iframe.style.height = height + 'px';
+        } catch (e) {
+          console.error('Error resizing iframe:', e);
+        }
+      }
+
+      // 获取所有iframe元素
+      const iframes = document.querySelectorAll('iframe');
+      
+      // 对每个iframe进行调整
+      iframes.forEach(iframe => {
+        // 当iframe加载完成时调整高度
+        iframe.onload = function() {
+          resizeIframe(iframe);
+        };
+        
+        // 如果iframe已经加载完成，立即调整高度
+        if (iframe.contentWindow.document.readyState === 'complete') {
+          resizeIframe(iframe);
+        }
+      });
+      
+      // 窗口大小改变时重新调整所有iframe
+      window.addEventListener('resize', function() {
+        iframes.forEach(iframe => {
+          resizeIframe(iframe);
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

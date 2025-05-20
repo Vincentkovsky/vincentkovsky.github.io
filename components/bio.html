@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bio Component</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/bold/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2D3748;
+      --accent: #48BB78;
+      --dark: #1A202C;
+      --light: #E2E8F0;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: transparent;
+      color: var(--light);
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    h1, h2, h3, h4 {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .skill-tag {
+      background: var(--primary);
+      color: var(--accent);
+      border-radius: 9999px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.875rem;
+      display: inline-block;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .skill-tag::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(72, 187, 120, 0.1),
+        rgba(72, 187, 120, 0.1) 5px,
+        rgba(72, 187, 120, 0.2) 5px,
+        rgba(72, 187, 120, 0.2) 10px
+      );
+      animation: flow 2s linear infinite;
+    }
+    
+    @keyframes flow {
+      0% {
+        left: -100%;
+      }
+      100% {
+        left: 100%;
+      }
+    }
+  </style>
+  <script>
+    // 当文档加载完成后通知父窗口调整iframe高度
+    window.addEventListener('load', function() {
+      if (window.parent) {
+        // 延迟一点时间确保所有内容已经渲染
+        setTimeout(function() {
+          // 触发父窗口中的resize事件来调整iframe高度
+          window.parent.dispatchEvent(new Event('resize'));
+        }, 100);
+      }
+    });
+  </script>
+</head>
+<body>
+  <div class="rounded-2xl p-6 md:p-8">
+    <div class="flex flex-col md:flex-row gap-6 items-center md:items-start">
+      <div class="relative">
+        <img src="https://picsum.photos/seed/vincentjin/200" 
+             alt="Vincent Jin's profile picture"
+             class="w-32 h-32 rounded-full border-4 border-[#48BB78]/30 hover:rotate-6 transition-transform object-cover">
+        <div class="absolute -bottom-2 right-0 bg-[#48BB78] text-xs px-2 rounded-full">
+          Available
+        </div>
+      </div>
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold mb-2 text-center md:text-left">Vincent Jin</h1>
+        <p class="text-gray-300 mb-4 text-center md:text-left">Software Developer & Resume Expert</p>
+        <div class="flex gap-2 flex-wrap justify-center md:justify-start">
+          <span class="skill-tag">JavaScript</span>
+          <span class="skill-tag">React</span>
+          <span class="skill-tag">Node.js</span>
+          <span class="skill-tag">Python</span>
+        </div>
+        <div class="mt-4 flex gap-4 justify-center md:justify-start">
+          <a href="https://github.com/" target="_blank" class="text-gray-300 hover:text-[#48BB78] transition-colors">
+            <i class="ph-bold ph-github-logo text-2xl"></i>
+          </a>
+          <a href="https://linkedin.com/" target="_blank" class="text-gray-300 hover:text-[#48BB78] transition-colors">
+            <i class="ph-bold ph-linkedin-logo text-2xl"></i>
+          </a>
+          <a href="mailto:contact@example.com" class="text-gray-300 hover:text-[#48BB78] transition-colors">
+            <i class="ph-bold ph-envelope text-2xl"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 border-t border-gray-700 pt-6">
+      <h2 class="text-xl font-bold mb-4">About Me</h2>
+      <p class="text-gray-300">
+        I'm a passionate developer with a focus on creating beautiful, functional web applications.
+        With expertise in modern JavaScript frameworks and a keen eye for design, I build solutions
+        that are both powerful and user-friendly.
+      </p>
+    </div>
+  </div>
+</body>
+</html> 

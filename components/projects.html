@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projects Component</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/bold/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2D3748;
+      --accent: #48BB78;
+      --dark: #1A202C;
+      --light: #E2E8F0;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: transparent;
+      color: var(--light);
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    h1, h2, h3, h4 {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .project-card {
+      background: var(--primary);
+      opacity: 0.9;
+      border-radius: 8px;
+      padding: 1.25rem;
+      transition: all 0.2s ease;
+    }
+    
+    .project-card:hover {
+      transform: translateY(-4px);
+      opacity: 1;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .project-tag {
+      background: rgba(26, 32, 44, 0.6);
+      color: var(--light);
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+    
+    a:focus, button:focus {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+  </style>
+  <script>
+    // 当文档加载完成后通知父窗口调整iframe高度
+    window.addEventListener('load', function() {
+      if (window.parent) {
+        // 延迟一点时间确保所有内容已经渲染
+        setTimeout(function() {
+          // 触发父窗口中的resize事件来调整iframe高度
+          window.parent.dispatchEvent(new Event('resize'));
+        }, 100);
+      }
+    });
+  </script>
+</head>
+<body>
+  <div class="rounded-2xl p-6 md:p-8">
+    <h2 class="text-xl font-bold mb-6 flex items-center">
+      <i class="ph-bold ph-code mr-2"></i>
+      Featured Projects
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Project Card 1 -->
+      <div class="project-card">
+        <div class="flex justify-between items-start mb-4">
+          <i class="ph-bold ph-folder text-[#48BB78] text-2xl"></i>
+          <div class="flex gap-2">
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <i class="ph-bold ph-github-logo"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <i class="ph-bold ph-link-simple"></i>
+            </a>
+          </div>
+        </div>
+        <h3 class="font-bold text-lg mb-2">Resume Builder</h3>
+        <p class="text-gray-300 text-sm mb-4">
+          A modern web app for creating professional resumes with customizable templates and real-time preview.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <span class="project-tag">React</span>
+          <span class="project-tag">Redux</span>
+          <span class="project-tag">Firebase</span>
+        </div>
+      </div>
+      
+      <!-- Project Card 2 -->
+      <div class="project-card">
+        <div class="flex justify-between items-start mb-4">
+          <i class="ph-bold ph-folder text-[#48BB78] text-2xl"></i>
+          <div class="flex gap-2">
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <i class="ph-bold ph-github-logo"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <i class="ph-bold ph-link-simple"></i>
+            </a>
+          </div>
+        </div>
+        <h3 class="font-bold text-lg mb-2">Code Analyzer</h3>
+        <p class="text-gray-300 text-sm mb-4">
+          An AI-powered tool that analyzes code repositories to identify patterns, potential bugs, and improvement opportunities.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <span class="project-tag">Python</span>
+          <span class="project-tag">TensorFlow</span>
+          <span class="project-tag">FastAPI</span>
+        </div>
+      </div>
+      
+      <!-- Project Card 3 -->
+      <div class="project-card">
+        <div class="flex justify-between items-start mb-4">
+          <i class="ph-bold ph-folder text-[#48BB78] text-2xl"></i>
+          <div class="flex gap-2">
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <i class="ph-bold ph-github-logo"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <i class="ph-bold ph-link-simple"></i>
+            </a>
+          </div>
+        </div>
+        <h3 class="font-bold text-lg mb-2">SmartHome Dashboard</h3>
+        <p class="text-gray-300 text-sm mb-4">
+          A responsive dashboard for controlling and monitoring smart home devices with intuitive visualizations.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <span class="project-tag">Vue.js</span>
+          <span class="project-tag">Node.js</span>
+          <span class="project-tag">MQTT</span>
+        </div>
+      </div>
+      
+      <!-- Project Card 4 -->
+      <div class="project-card">
+        <div class="flex justify-between items-start mb-4">
+          <i class="ph-bold ph-folder text-[#48BB78] text-2xl"></i>
+          <div class="flex gap-2">
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <i class="ph-bold ph-github-logo"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <i class="ph-bold ph-link-simple"></i>
+            </a>
+          </div>
+        </div>
+        <h3 class="font-bold text-lg mb-2">E-Commerce Platform</h3>
+        <p class="text-gray-300 text-sm mb-4">
+          A full-featured online store with product management, payment processing, and order tracking capabilities.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <span class="project-tag">Next.js</span>
+          <span class="project-tag">MongoDB</span>
+          <span class="project-tag">Stripe</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html> 

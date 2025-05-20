@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skills Component</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/bold/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2D3748;
+      --accent: #48BB78;
+      --dark: #1A202C;
+      --light: #E2E8F0;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: transparent;
+      color: var(--light);
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    h1, h2, h3, h4 {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .skill-tag {
+      background: var(--primary);
+      color: var(--accent);
+      border-radius: 9999px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.875rem;
+      display: inline-block;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .skill-tag::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(72, 187, 120, 0.1),
+        rgba(72, 187, 120, 0.1) 5px,
+        rgba(72, 187, 120, 0.2) 5px,
+        rgba(72, 187, 120, 0.2) 10px
+      );
+      animation: flow 2s linear infinite;
+    }
+    
+    @keyframes flow {
+      0% {
+        left: -100%;
+      }
+      100% {
+        left: 100%;
+      }
+    }
+    
+    /* Skill bar styling */
+    .skill-bar {
+      margin-bottom: 1rem;
+    }
+    
+    .skill-bar .label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
+    }
+    
+    .skill-bar .progress {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .skill-bar .progress .fill {
+      height: 100%;
+      background: var(--accent);
+      position: relative;
+    }
+    
+    .skill-bar .progress .fill .glow {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: 5px;
+      background: rgba(255, 255, 255, 0.7);
+      filter: blur(3px);
+    }
+  </style>
+  <script>
+    // 当文档加载完成后通知父窗口调整iframe高度
+    window.addEventListener('load', function() {
+      if (window.parent) {
+        // 延迟一点时间确保所有内容已经渲染
+        setTimeout(function() {
+          // 触发父窗口中的resize事件来调整iframe高度
+          window.parent.dispatchEvent(new Event('resize'));
+        }, 100);
+      }
+    });
+  </script>
+</head>
+<body>
+  <div class="rounded-2xl p-6 md:p-8">
+    <h2 class="text-xl font-bold mb-6 flex items-center">
+      <i class="ph-bold ph-chart-bar mr-2"></i>
+      Technical Skills
+    </h2>
+    <div class="skill-bar">
+      <div class="label">
+        <span>JavaScript/TypeScript</span>
+        <span>90%</span>
+      </div>
+      <div class="progress">
+        <div class="fill" style="width:90%">
+          <div class="glow"></div>
+        </div>
+      </div>
+    </div>
+    <div class="skill-bar">
+      <div class="label">
+        <span>React & Next.js</span>
+        <span>85%</span>
+      </div>
+      <div class="progress">
+        <div class="fill" style="width:85%">
+          <div class="glow"></div>
+        </div>
+      </div>
+    </div>
+    <div class="skill-bar">
+      <div class="label">
+        <span>Node.js</span>
+        <span>80%</span>
+      </div>
+      <div class="progress">
+        <div class="fill" style="width:80%">
+          <div class="glow"></div>
+        </div>
+      </div>
+    </div>
+    <div class="skill-bar">
+      <div class="label">
+        <span>Python</span>
+        <span>75%</span>
+      </div>
+      <div class="progress">
+        <div class="fill" style="width:75%">
+          <div class="glow"></div>
+        </div>
+      </div>
+    </div>
+    <div class="skill-bar">
+      <div class="label">
+        <span>UI/UX Design</span>
+        <span>70%</span>
+      </div>
+      <div class="progress">
+        <div class="fill" style="width:70%">
+          <div class="glow"></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="text-lg font-bold mt-8 mb-4">Tools & Technologies</h3>
+    <div class="flex flex-wrap gap-2">
+      <span class="skill-tag">Git</span>
+      <span class="skill-tag">Docker</span>
+      <span class="skill-tag">AWS</span>
+      <span class="skill-tag">Tailwind CSS</span>
+      <span class="skill-tag">MongoDB</span>
+      <span class="skill-tag">PostgreSQL</span>
+      <span class="skill-tag">GraphQL</span>
+      <span class="skill-tag">Jest</span>
+    </div>
+  </div>
+</body>
+</html> 
