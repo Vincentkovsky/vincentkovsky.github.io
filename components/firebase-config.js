@@ -9,6 +9,28 @@ GitHub Pages部署说明：
 4. 在Firebase控制台中，转到Firestore数据库并创建一个新的数据库（可以从测试模式开始）
 5. 在Firebase控制台启用匿名认证: Authentication > Sign-in method > Anonymous > Enable
 6. 设置Firebase安全规则，仅允许认证用户访问
+
+Firestore安全规则示例:
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 允许匿名用户访问
+    match /visitors/{document=**} {
+      // 读取权限
+      allow read: if true;  
+      // 创建和更新权限
+      allow write: if true;
+    }
+    
+    // 统计数据
+    match /statistics/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
+```
 */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -25,10 +47,7 @@ import {
   limit,
   getDoc,
   setDoc,
-  deleteDoc,
-  connectFirestoreEmulator, // 添加模拟器连接
-  enableNetwork,           // 添加网络启用
-  disableNetwork           // 添加网络禁用
+  deleteDoc 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -42,6 +61,38 @@ const firebaseConfig = {
   appId: "YOUR_APP_ID"
 };
 
+// 本地存储的备用数据
+const localStorageKey = 'portfolio_visitors_data';
+
+// 初始化本地存储数据
+function initLocalData() {
+  if (!localStorage.getItem(localStorageKey)) {
+    const initialData = {
+      visitors: [],
+      totalCount: 0,
+      countries: {},
+      cities: {},
+      lastUpdated: new Date().toISOString()
+    };
+    localStorage.setItem(localStorageKey, JSON.stringify(initialData));
+  }
+  return JSON.parse(localStorage.getItem(localStorageKey));
+}
+
+// 如果Firebase失败，获取本地数据
+function getLocalData() {
+  try {
+    return JSON.parse(localStorage.getItem(localStorageKey)) || initLocalData();
+  } catch (e) {
+    return initLocalData();
+  }
+}
+
+// 保存本地数据
+function saveLocalData(data) {
+  localStorage.setItem(localStorageKey, JSON.stringify(data));
+}
+
 // 初始化Firebase
 let app;
 let db;
@@ -49,51 +100,15 @@ let auth;
 let currentUser = null;
 let visitorsCollection;
 let statsDoc;
-let connectionRetryCount = 0;
-const MAX_RETRY_ATTEMPTS = 3;
-
-// 连接状态跟踪
-let isConnecting = false;
-let isConnected = false;
+let firebaseInitialized = false;
 
 try {
-  console.log("正在初始化Firebase...");
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
   auth = getAuth(app);
   visitorsCollection = collection(db, "visitors");
   statsDoc = doc(db, "statistics", "visitorStats");
-  
-  // 添加连接重试逻辑
-  const connectWithRetry = async () => {
-    if (isConnecting) return; // 防止并发连接尝试
-    
-    isConnecting = true;
-    
-    try {
-      // 尝试重新启用网络连接
-      await enableNetwork(db);
-      console.log("Firebase网络连接已启用");
-      isConnected = true;
-      connectionRetryCount = 0; // 重置重试计数
-    } catch (error) {
-      connectionRetryCount++;
-      console.error(`Firebase连接失败 (${connectionRetryCount}/${MAX_RETRY_ATTEMPTS}):`, error);
-      
-      if (connectionRetryCount < MAX_RETRY_ATTEMPTS) {
-        console.log(`${Math.pow(2, connectionRetryCount) * 1000}毫秒后重试...`);
-        setTimeout(connectWithRetry, Math.pow(2, connectionRetryCount) * 1000); // 指数退避重试
-      } else {
-        console.warn("达到最大重试次数，将在离线模式下运行");
-      }
-    } finally {
-      isConnecting = false;
-    }
-  };
-  
-  // 初始连接尝试
-  connectWithRetry();
-  
+  firebaseInitialized = true;
   console.log("Firebase initialized successfully");
   
   // 尝试匿名登录
@@ -119,6 +134,9 @@ try {
   });
 } catch (error) {
   console.error("Firebase initialization error:", error);
+  firebaseInitialized = false;
+  // 初始化本地数据作为后备
+  initLocalData();
 }
 
 // 访客数据Firebase存储管理
@@ -130,7 +148,7 @@ const FirebaseVisitorStorage = {
     // 检查是否有效的Firebase配置
     const hasValidConfig = firebaseConfig.apiKey !== "YOUR_API_KEY";
     // 检查Firebase是否成功初始化
-    const isInitialized = app && db;
+    const isInitialized = firebaseInitialized && app && db;
     return hasValidConfig && isInitialized;
   },
   
@@ -145,6 +163,11 @@ const FirebaseVisitorStorage = {
    * 等待身份验证完成
    */
   async waitForAuthentication(maxWaitTime = 5000) {
+    // 如果Firebase未配置，不等待认证
+    if (!this.isConfigured()) {
+      return false;
+    }
+    
     // 如果已认证，直接返回
     if (this.isAuthenticated()) {
       return true;
@@ -171,49 +194,51 @@ const FirebaseVisitorStorage = {
   },
   
   /**
-   * 手动重新连接Firebase
-   */
-  async reconnect() {
-    if (isConnecting) return false;
-    
-    try {
-      console.log("尝试重新连接Firebase...");
-      // 先禁用网络，然后重新启用，有时可以解决连接问题
-      await disableNetwork(db);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 等待1秒
-      await enableNetwork(db);
-      console.log("Firebase重新连接成功");
-      isConnected = true;
-      return true;
-    } catch (error) {
-      console.error("Firebase重新连接失败:", error);
-      isConnected = false;
-      return false;
-    }
-  },
-  
-  /**
    * 初始化统计数据
    */
   async initStats() {
     try {
+      // 如果Firebase未配置，使用本地数据
       if (!this.isConfigured()) {
-        throw new Error("Firebase not properly configured");
+        console.log("Using local storage for stats (Firebase not configured)");
+        const localData = getLocalData();
+        return {
+          totalVisitors: localData.totalCount,
+          uniqueCountries: Object.keys(localData.countries || {}).length,
+          uniqueCities: Object.keys(localData.cities || {}).length,
+          topCities: this.getTopCitiesFromLocal()
+        };
       }
       
-      const statsSnapshot = await getDoc(statsDoc);
+      // 等待认证完成
+      await this.waitForAuthentication();
       
-      if (!statsSnapshot.exists()) {
-        await setDoc(statsDoc, {
-          totalVisitors: 0,
-          countries: {},
-          cities: {},
-          lastUpdated: new Date().toISOString()
-        });
-        console.log("Initialized visitor statistics");
+      try {
+        const statsSnapshot = await getDoc(statsDoc);
+        
+        if (!statsSnapshot.exists()) {
+          await setDoc(statsDoc, {
+            totalVisitors: 0,
+            countries: {},
+            cities: {},
+            lastUpdated: new Date().toISOString()
+          });
+          console.log("Initialized visitor statistics");
+        }
+        
+        return await this.getStats();
+      } catch (firestoreError) {
+        // 如果Firestore访问失败，回退到本地存储
+        console.error("Firestore access error, falling back to local storage:", firestoreError);
+        const localData = getLocalData();
+        return {
+          totalVisitors: localData.totalCount,
+          uniqueCountries: Object.keys(localData.countries || {}).length,
+          uniqueCities: Object.keys(localData.cities || {}).length,
+          topCities: this.getTopCitiesFromLocal(),
+          isLocalData: true
+        };
       }
-      
-      return await this.getStats();
     } catch (error) {
       console.error("Error initializing stats:", error);
       return {
@@ -227,15 +252,134 @@ const FirebaseVisitorStorage = {
   },
   
   /**
+   * 从本地存储获取热门城市
+   */
+  getTopCitiesFromLocal(limit = 3) {
+    const localData = getLocalData();
+    
+    // 将城市数据转换为数组并排序
+    const cityEntries = Object.entries(localData.cities || {});
+    const sortedCities = cityEntries.sort((a, b) => b[1] - a[1]);
+    
+    // 返回前N个城市及其百分比
+    return sortedCities.slice(0, limit).map(([name, count]) => ({
+      name,
+      count,
+      percentage: localData.totalCount ? Math.round((count / localData.totalCount) * 100) : 0
+    }));
+  },
+  
+  /**
    * 添加新访客
    * @param {Object} visitorData - 访客信息
    * @returns {Promise<Object>} - 返回保存的访客数据
    */
   async addVisitor(visitorData) {
     try {
+      // 如果Firebase未配置，保存到本地
       if (!this.isConfigured()) {
-        throw new Error("Firebase not properly configured");
+        console.log("Using local storage for adding visitor (Firebase not configured)");
+        return this.addVisitorToLocal(visitorData);
       }
+      
+      // 等待认证完成
+      await this.waitForAuthentication();
+      
+      // 添加浏览器和引荐来源
+      const enrichedData = {
+        ...visitorData,
+        userAgent: navigator.userAgent,
+        referrer: document.referrer || 'direct',
+        screenSize: `${window.screen.width}x${window.screen.height}`,
+        userId: currentUser ? currentUser.uid : null // 添加用户ID
+      };
+      
+      try {
+        // 检查是否已存在相同IP的访客
+        const existingVisitorQuery = query(visitorsCollection, where("ip", "==", visitorData.ip));
+        const existingVisitorSnapshot = await getDocs(existingVisitorQuery);
+        
+        let visitorRef;
+        let visitor;
+        
+        if (!existingVisitorSnapshot.empty) {
+          // 更新现有访客
+          visitorRef = doc(db, "visitors", existingVisitorSnapshot.docs[0].id);
+          const existingData = existingVisitorSnapshot.docs[0].data();
+          
+          await updateDoc(visitorRef, {
+            lastVisit: new Date().toISOString(),
+            visitCount: (existingData.visitCount || 1) + 1
+          });
+          
+          // 获取更新后的文档
+          const updatedSnapshot = await getDoc(visitorRef);
+          visitor = { id: updatedSnapshot.id, ...updatedSnapshot.data() };
+          console.log("Updated existing visitor:", visitor.id);
+        } else {
+          // 添加新访客
+          const newVisitor = {
+            ...enrichedData,
+            timestamp: new Date().toISOString(),
+            visitCount: 1
+          };
+          
+          const docRef = await addDoc(visitorsCollection, newVisitor);
+          visitor = { id: docRef.id, ...newVisitor };
+          console.log("Added new visitor:", visitor.id);
+          
+          // 更新统计信息
+          const statsSnapshot = await getDoc(statsDoc);
+          
+          if (statsSnapshot.exists()) {
+            const stats = statsSnapshot.data();
+            const countryName = enrichedData.country_name || "Unknown";
+            const cityName = enrichedData.city || "Unknown";
+            const cityKey = `${cityName}, ${countryName}`;
+            
+            // 更新国家统计
+            const countries = stats.countries || {};
+            countries[countryName] = (countries[countryName] || 0) + 1;
+            
+            // 更新城市统计
+            const cities = stats.cities || {};
+            cities[cityKey] = (cities[cityKey] || 0) + 1;
+            
+            await updateDoc(statsDoc, {
+              totalVisitors: stats.totalVisitors + 1,
+              countries,
+              cities,
+              lastUpdated: new Date().toISOString()
+            });
+            console.log("Updated visitor statistics");
+          } else {
+            // 创建新的统计文档
+            await this.initStats();
+          }
+        }
+        
+        // 同时保存到本地存储作为备份
+        this.addVisitorToLocal(visitorData);
+        
+        return visitor;
+      } catch (firestoreError) {
+        // 如果Firestore访问失败，回退到本地存储
+        console.error("Firestore access error, falling back to local storage:", firestoreError);
+        return this.addVisitorToLocal(visitorData);
+      }
+    } catch (error) {
+      console.error("Error adding visitor:", error);
+      // 出错时也尝试保存到本地
+      return this.addVisitorToLocal(visitorData);
+    }
+  },
+  
+  /**
+   * 将访客数据保存到本地存储
+   */
+  addVisitorToLocal(visitorData) {
+    try {
+      const localData = getLocalData();
       
       // 添加浏览器和引荐来源
       const enrichedData = {
@@ -245,73 +389,49 @@ const FirebaseVisitorStorage = {
         screenSize: `${window.screen.width}x${window.screen.height}`
       };
       
-      // 检查是否已存在相同IP的访客
-      const existingVisitorQuery = query(visitorsCollection, where("ip", "==", visitorData.ip));
-      const existingVisitorSnapshot = await getDocs(existingVisitorQuery);
+      // 检查是否已存在具有相同IP的访客
+      const existingIpIndex = localData.visitors.findIndex(v => v.ip === visitorData.ip);
       
-      let visitorRef;
-      let visitor;
-      
-      if (!existingVisitorSnapshot.empty) {
-        // 更新现有访客
-        visitorRef = doc(db, "visitors", existingVisitorSnapshot.docs[0].id);
-        const existingData = existingVisitorSnapshot.docs[0].data();
-        
-        await updateDoc(visitorRef, {
-          lastVisit: new Date().toISOString(),
-          visitCount: (existingData.visitCount || 1) + 1
-        });
-        
-        // 获取更新后的文档
-        const updatedSnapshot = await getDoc(visitorRef);
-        visitor = { id: updatedSnapshot.id, ...updatedSnapshot.data() };
-        console.log("Updated existing visitor:", visitor.id);
+      if (existingIpIndex >= 0) {
+        // 更新现有访客的最后访问时间
+        localData.visitors[existingIpIndex].lastVisit = new Date().toISOString();
+        localData.visitors[existingIpIndex].visitCount = (localData.visitors[existingIpIndex].visitCount || 1) + 1;
       } else {
-        // 添加新访客
-        const newVisitor = {
+        // 添加新访客记录
+        const visitor = {
           ...enrichedData,
           timestamp: new Date().toISOString(),
+          visitId: `visit_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
           visitCount: 1
         };
         
-        const docRef = await addDoc(visitorsCollection, newVisitor);
-        visitor = { id: docRef.id, ...newVisitor };
-        console.log("Added new visitor:", visitor.id);
+        // 更新访客列表
+        localData.visitors.push(visitor);
+        localData.totalCount++;
         
-        // 更新统计信息
-        const statsSnapshot = await getDoc(statsDoc);
+        // 更新国家统计
+        if (visitor.country_name) {
+          localData.countries[visitor.country_name] = (localData.countries[visitor.country_name] || 0) + 1;
+        }
         
-        if (statsSnapshot.exists()) {
-          const stats = statsSnapshot.data();
-          const countryName = enrichedData.country_name || "Unknown";
-          const cityName = enrichedData.city || "Unknown";
-          const cityKey = `${cityName}, ${countryName}`;
-          
-          // 更新国家统计
-          const countries = stats.countries || {};
-          countries[countryName] = (countries[countryName] || 0) + 1;
-          
-          // 更新城市统计
-          const cities = stats.cities || {};
-          cities[cityKey] = (cities[cityKey] || 0) + 1;
-          
-          await updateDoc(statsDoc, {
-            totalVisitors: stats.totalVisitors + 1,
-            countries,
-            cities,
-            lastUpdated: new Date().toISOString()
-          });
-          console.log("Updated visitor statistics");
-        } else {
-          // 创建新的统计文档
-          await this.initStats();
+        // 更新城市统计
+        if (visitor.city) {
+          const cityKey = `${visitor.city}, ${visitor.country_name}`;
+          localData.cities[cityKey] = (localData.cities[cityKey] || 0) + 1;
         }
       }
       
-      return visitor;
-    } catch (error) {
-      console.error("Error adding visitor:", error);
-      return { error: error.message };
+      // 更新最后更新时间
+      localData.lastUpdated = new Date().toISOString();
+      
+      // 存储更新后的数据
+      saveLocalData(localData);
+      console.log("Visitor data saved to local storage");
+      
+      return { ...enrichedData, isLocalData: true };
+    } catch (e) {
+      console.error("Error adding visitor to local storage:", e);
+      return { error: e.message };
     }
   },
   
@@ -321,42 +441,70 @@ const FirebaseVisitorStorage = {
    */
   async getStats() {
     try {
+      // 如果Firebase未配置，使用本地数据
       if (!this.isConfigured()) {
-        throw new Error("Firebase not properly configured");
+        console.log("Using local storage for stats (Firebase not configured)");
+        const localData = getLocalData();
+        return {
+          totalVisitors: localData.totalCount,
+          uniqueCountries: Object.keys(localData.countries || {}).length,
+          uniqueCities: Object.keys(localData.cities || {}).length,
+          topCities: this.getTopCitiesFromLocal(),
+          isLocalData: true
+        };
       }
       
-      const statsSnapshot = await getDoc(statsDoc);
+      // 等待认证完成
+      await this.waitForAuthentication();
       
-      if (!statsSnapshot.exists()) {
-        return await this.initStats();
+      try {
+        const statsSnapshot = await getDoc(statsDoc);
+        
+        if (!statsSnapshot.exists()) {
+          return await this.initStats();
+        }
+        
+        const stats = statsSnapshot.data();
+        
+        // 获取顶部城市
+        const cities = stats.cities || {};
+        const cityEntries = Object.entries(cities);
+        const sortedCities = cityEntries.sort((a, b) => b[1] - a[1]);
+        
+        const topCities = sortedCities.slice(0, 3).map(([name, count]) => ({
+          name,
+          count,
+          percentage: stats.totalVisitors ? Math.round((count / stats.totalVisitors) * 100) : 0
+        }));
+        
+        return {
+          totalVisitors: stats.totalVisitors || 0,
+          uniqueCountries: Object.keys(stats.countries || {}).length,
+          uniqueCities: Object.keys(stats.cities || {}).length,
+          topCities
+        };
+      } catch (firestoreError) {
+        // 如果Firestore访问失败，回退到本地存储
+        console.error("Firestore access error, falling back to local storage:", firestoreError);
+        const localData = getLocalData();
+        return {
+          totalVisitors: localData.totalCount,
+          uniqueCountries: Object.keys(localData.countries || {}).length,
+          uniqueCities: Object.keys(localData.cities || {}).length,
+          topCities: this.getTopCitiesFromLocal(),
+          isLocalData: true
+        };
       }
-      
-      const stats = statsSnapshot.data();
-      
-      // 获取顶部城市
-      const cities = stats.cities || {};
-      const cityEntries = Object.entries(cities);
-      const sortedCities = cityEntries.sort((a, b) => b[1] - a[1]);
-      
-      const topCities = sortedCities.slice(0, 3).map(([name, count]) => ({
-        name,
-        count,
-        percentage: stats.totalVisitors ? Math.round((count / stats.totalVisitors) * 100) : 0
-      }));
-      
-      return {
-        totalVisitors: stats.totalVisitors || 0,
-        uniqueCountries: Object.keys(stats.countries || {}).length,
-        uniqueCities: Object.keys(stats.cities || {}).length,
-        topCities
-      };
     } catch (error) {
       console.error("Error getting stats:", error);
+      // 尝试从本地数据中获取
+      const localData = getLocalData();
       return {
-        totalVisitors: 0,
-        uniqueCountries: 0,
-        uniqueCities: 0,
-        topCities: [],
+        totalVisitors: localData.totalCount,
+        uniqueCountries: Object.keys(localData.countries || {}).length,
+        uniqueCities: Object.keys(localData.cities || {}).length,
+        topCities: this.getTopCitiesFromLocal(),
+        isLocalData: true,
         error: error.message
       };
     }
