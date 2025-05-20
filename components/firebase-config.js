@@ -2,7 +2,7 @@
 // 注意：您需要在Firebase控制台中创建一个项目，并在这里替换配置信息
 
 /*
-GitHub Pages部署说明：
+Firebase配置说明：
 1. 在Firebase控制台(https://console.firebase.google.com/)创建一个新项目
 2. 在项目设置中添加一个Web应用
 3. 复制生成的Firebase配置对象，替换下面的配置
@@ -29,24 +29,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// 尝试导入本地配置（如果存在）
-let localFirebaseConfig;
-try {
-  const localConfigModule = await import('./firebase-config.local.js');
-  localFirebaseConfig = localConfigModule.firebaseConfig;
-  console.log("Using local Firebase configuration");
-} catch (error) {
-  console.log("Local Firebase configuration not found, using default");
-}
-
-// Firebase配置 - 优先使用本地配置，否则使用默认配置
-const firebaseConfig = localFirebaseConfig || {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+// Firebase配置 - 请替换为您的Firebase项目配置
+const firebaseConfig = {
+  apiKey: "AIzaSyDQ1AaF0akvP-Q_Lu1xM_Eh0WWiiYVbJXw",
+  authDomain: "vincentkovsky.firebaseapp.com",
+  projectId: "vincentkovsky",
+  storageBucket: "vincentkovsky.appspot.com",
+  messagingSenderId: "773913920947",
+  appId: "1:773913920947:web:d4f51c8c4b81c6fe4577c6"
 };
 
 // 初始化Firebase
@@ -97,7 +87,7 @@ const FirebaseVisitorStorage = {
    */
   isConfigured() {
     // 检查是否有效的Firebase配置
-    const hasValidConfig = firebaseConfig.apiKey !== "YOUR_API_KEY";
+    const hasValidConfig = firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY";
     // 检查Firebase是否成功初始化
     const isInitialized = app && db;
     return hasValidConfig && isInitialized;
