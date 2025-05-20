@@ -1,6 +1,16 @@
 // Firebase访客数据存储模块
 // 注意：您需要在Firebase控制台中创建一个项目，并在这里替换配置信息
 
+/*
+GitHub Pages部署说明：
+1. 在Firebase控制台(https://console.firebase.google.com/)创建一个新项目
+2. 在项目设置中添加一个Web应用
+3. 复制生成的Firebase配置对象，替换下面的配置
+4. 在Firebase控制台中，转到Firestore数据库并创建一个新的数据库（可以从测试模式开始）
+5. 在Firebase控制台启用匿名认证: Authentication > Sign-in method > Anonymous > Enable
+6. 设置Firebase安全规则，仅允许认证用户访问
+*/
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
   getFirestore, 
@@ -15,31 +25,98 @@ import {
   limit,
   getDoc,
   setDoc,
-  deleteDoc 
+  deleteDoc,
+  connectFirestoreEmulator, // 添加模拟器连接
+  enableNetwork,           // 添加网络启用
+  disableNetwork           // 添加网络禁用
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 // Firebase配置 - 请替换为您的Firebase项目配置
 const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
 // 初始化Firebase
 let app;
 let db;
+let auth;
+let currentUser = null;
 let visitorsCollection;
 let statsDoc;
+let connectionRetryCount = 0;
+const MAX_RETRY_ATTEMPTS = 3;
+
+// 连接状态跟踪
+let isConnecting = false;
+let isConnected = false;
 
 try {
+  console.log("正在初始化Firebase...");
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
+  auth = getAuth(app);
   visitorsCollection = collection(db, "visitors");
   statsDoc = doc(db, "statistics", "visitorStats");
+  
+  // 添加连接重试逻辑
+  const connectWithRetry = async () => {
+    if (isConnecting) return; // 防止并发连接尝试
+    
+    isConnecting = true;
+    
+    try {
+      // 尝试重新启用网络连接
+      await enableNetwork(db);
+      console.log("Firebase网络连接已启用");
+      isConnected = true;
+      connectionRetryCount = 0; // 重置重试计数
+    } catch (error) {
+      connectionRetryCount++;
+      console.error(`Firebase连接失败 (${connectionRetryCount}/${MAX_RETRY_ATTEMPTS}):`, error);
+      
+      if (connectionRetryCount < MAX_RETRY_ATTEMPTS) {
+        console.log(`${Math.pow(2, connectionRetryCount) * 1000}毫秒后重试...`);
+        setTimeout(connectWithRetry, Math.pow(2, connectionRetryCount) * 1000); // 指数退避重试
+      } else {
+        console.warn("达到最大重试次数，将在离线模式下运行");
+      }
+    } finally {
+      isConnecting = false;
+    }
+  };
+  
+  // 初始连接尝试
+  connectWithRetry();
+  
   console.log("Firebase initialized successfully");
+  
+  // 尝试匿名登录
+  signInAnonymously(auth)
+    .then(() => {
+      console.log("Anonymous authentication successful");
+    })
+    .catch((error) => {
+      console.error("Anonymous authentication error:", error);
+    });
+  
+  // 监听认证状态变化
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // 用户已登录
+      currentUser = user;
+      console.log("User authenticated with ID:", user.uid);
+    } else {
+      // 用户已登出
+      currentUser = null;
+      console.log("User signed out");
+    }
+  });
 } catch (error) {
   console.error("Firebase initialization error:", error);
 }
@@ -55,6 +132,64 @@ const FirebaseVisitorStorage = {
     // 检查Firebase是否成功初始化
     const isInitialized = app && db;
     return hasValidConfig && isInitialized;
+  },
+  
+  /**
+   * 检查用户是否已通过认证
+   */
+  isAuthenticated() {
+    return !!currentUser;
+  },
+  
+  /**
+   * 等待身份验证完成
+   */
+  async waitForAuthentication(maxWaitTime = 5000) {
+    // 如果已认证，直接返回
+    if (this.isAuthenticated()) {
+      return true;
+    }
+    
+    // 否则等待认证完成
+    return new Promise((resolve) => {
+      const authCheckInterval = 100; // 毫秒
+      let elapsedTime = 0;
+      
+      const checkAuth = setInterval(() => {
+        elapsedTime += authCheckInterval;
+        
+        if (this.isAuthenticated()) {
+          clearInterval(checkAuth);
+          resolve(true);
+        } else if (elapsedTime >= maxWaitTime) {
+          clearInterval(checkAuth);
+          console.warn("Authentication timed out");
+          resolve(false);
+        }
+      }, authCheckInterval);
+    });
+  },
+  
+  /**
+   * 手动重新连接Firebase
+   */
+  async reconnect() {
+    if (isConnecting) return false;
+    
+    try {
+      console.log("尝试重新连接Firebase...");
+      // 先禁用网络，然后重新启用，有时可以解决连接问题
+      await disableNetwork(db);
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 等待1秒
+      await enableNetwork(db);
+      console.log("Firebase重新连接成功");
+      isConnected = true;
+      return true;
+    } catch (error) {
+      console.error("Firebase重新连接失败:", error);
+      isConnected = false;
+      return false;
+    }
   },
   
   /**
