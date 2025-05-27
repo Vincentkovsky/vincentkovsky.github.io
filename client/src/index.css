@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 222 84% 4.9%; /* #0f172a */
+  --foreground: 210 40% 98%; /* #f8fafc */
+  --card: 217 33% 17%; /* #1e293b */
+  --card-foreground: 210 40% 98%; /* #f8fafc */
+  --popover: 222 84% 4.9%; /* #0f172a */
+  --popover-foreground: 210 40% 98%; /* #f8fafc */
+  --primary: 160 84% 39%; /* #10b981 */
+  --primary-foreground: 222 84% 4.9%; /* #0f172a */
+  --secondary: 217 33% 17%; /* #1e293b */
+  --secondary-foreground: 210 40% 98%; /* #f8fafc */
+  --muted: 215 28% 17%; /* #1e293b */
+  --muted-foreground: 217 11% 65%; /* #94a3b8 */
+  --accent: 160 84% 39%; /* #10b981 */
+  --accent-foreground: 222 84% 4.9%; /* #0f172a */
+  --destructive: 0 63% 31%; /* #7f1d1d */
+  --destructive-foreground: 210 40% 98%; /* #f8fafc */
+  --border: 217 33% 17%; /* #1e293b */
+  --input: 217 33% 17%; /* #1e293b */
+  --ring: 160 84% 39%; /* #10b981 */
+  --radius: 0.5rem;
+  --chart-1: 160 84% 39%; /* #10b981 */
+  --chart-2: 221 83% 53%; /* #3b82f6 */
+  --chart-3: 45 93% 47%; /* #eab308 */
+  --chart-4: 27 96% 61%; /* #f97316 */
+  --chart-5: 10 79% 54%; /* #ef4444 */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .animate-progress {
+    animation: progress 2s ease-out forwards;
+  }
+
+  @keyframes progress {
+    from {
+      width: 0%;
+    }
+  }
+
+  .glass-effect {
+    backdrop-filter: blur(10px);
+    background: rgba(30, 41, 59, 0.8);
+  }
+}
