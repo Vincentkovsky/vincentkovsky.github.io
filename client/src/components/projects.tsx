@@ -53,15 +53,19 @@ export default function Projects() {
           {projects.map((project, index) => (
             <div
               key={project.title}
-              className="bg-card rounded-xl border border-border overflow-hidden hover:border-primary transition-all duration-300 hover:transform hover:scale-105 group"
+              className="bg-card rounded-xl border border-border overflow-hidden hover:border-primary transition-all duration-300 card-hover-effect group animate-fade-in-up"
+              style={{ animationDelay: `${index * 200}ms` }}
             >
-              <img
-                src={project.image}
-                alt={`${project.title} Interface`}
-                className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
-              />
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors duration-200">
+              <div className="relative overflow-hidden">
+                <img
+                  src={project.image}
+                  alt={`${project.title} Interface`}
+                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
+              <div className="p-6 relative">
+                <h3 className="text-xl font-bold mb-2 text-gradient group-hover:scale-105 transition-transform duration-200">
                   {project.title}
                 </h3>
                 <p className="text-muted-foreground mb-4 leading-relaxed">
@@ -69,10 +73,11 @@ export default function Projects() {
                 </p>
                 <div className="flex justify-between items-center">
                   <div className="flex flex-wrap gap-2">
-                    {project.tags.map((tag) => (
+                    {project.tags.map((tag, tagIndex) => (
                       <span
                         key={tag}
-                        className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-medium"
+                        className="bg-gradient-to-r from-primary/20 to-blue-500/20 text-primary px-3 py-1 rounded-full text-sm font-medium hover:from-primary/30 hover:to-blue-500/30 transition-all duration-300 animate-fade-in-up"
+                        style={{ animationDelay: `${(index * 200) + (tagIndex * 100)}ms` }}
                       >
                         {tag}
                       </span>
@@ -81,13 +86,13 @@ export default function Projects() {
                   <div className="flex space-x-3">
                     <a
                       href={project.github}
-                      className="text-muted-foreground hover:text-primary transition-colors duration-200"
+                      className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-125 hover-glow p-2 rounded-full"
                     >
                       <Github className="w-5 h-5" />
                     </a>
                     <a
                       href={project.live}
-                      className="text-muted-foreground hover:text-primary transition-colors duration-200"
+                      className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-125 hover-glow p-2 rounded-full"
                     >
                       <ExternalLink className="w-5 h-5" />
                     </a>
