@@ -5,36 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>Redirecting...</title>
     <script>
-      // 获取仓库名，以便正确重定向
-      const repoName = "PersonalWeb"; // 您的仓库名
-      const pathSegments = window.location.pathname.split("/").filter(Boolean);
-      let basePath = "/";
+      // SPA for GitHub Pages - Redirect script
+      (function () {
+        // 获取仓库名，以便正确重定向
+        const repoName = "PersonalWeb"; // 您的仓库名
 
-      // 如果路径中包含仓库名（GitHub Pages部署），则保留它
-      if (pathSegments.includes(repoName)) {
-        basePath = `/${repoName}/`;
-      }
+        // 判断是否在GitHub Pages环境
+        const isGitHubPages =
+          window.location.hostname.includes("github.io") ||
+          window.location.hostname.includes("vincentjin.dev");
 
-      // 构造新的URL，保留查询参数和哈希值
-      const redirectPath = window.location.pathname.replace(
-        new RegExp(`^${basePath.replace(/\//g, "\\/")}`),
-        ""
-      );
-      const newUrl = `${window.location.origin}${basePath}?redirect=${encodeURIComponent(
-        redirectPath
-      )}${window.location.search}${window.location.hash}`;
+        // 确定基础路径
+        let basePath = isGitHubPages ? `/${repoName}/` : "/";
 
-      // 执行重定向
-      window.location.href = newUrl;
+        // 获取当前路径（不包括基础路径）
+        let currentPath = window.location.pathname;
+        if (isGitHubPages && currentPath.startsWith(basePath)) {
+          currentPath = currentPath.substring(basePath.length);
+        }
+
+        // 构造重定向URL
+        let redirectUrl = `${window.location.origin}${basePath}?redirect=${encodeURIComponent(
+          currentPath
+        )}`;
+
+        // 保留原始查询参数（如果有）
+        if (window.location.search && window.location.search.length > 1) {
+          redirectUrl += `&${window.location.search.substring(1)}`;
+        }
+
+        // 保留哈希值（如果有）
+        if (window.location.hash) {
+          redirectUrl += window.location.hash;
+        }
+
+        // 执行重定向
+        window.location.replace(redirectUrl);
+
+        // 更新链接（以防脚本被阻止运行）
+        window.onload = function () {
+          document.getElementById("redirect-link").href = redirectUrl;
+        };
+      })();
     </script>
   </head>
   <body>
-    <p>
-      If you are not redirected automatically, please <a id="redirect-link" href="#">click here</a>.
-    </p>
-    <script>
-      // 更新链接的href，以防脚本阻塞
-      document.getElementById("redirect-link").href = newUrl;
-    </script>
+    <div style="text-align: center; font-family: sans-serif; margin-top: 50px">
+      <h2>Page Not Found</h2>
+      <p>
+        If you are not redirected automatically, <a id="redirect-link" href="#">click here</a> to go
+        to the homepage.
+      </p>
+    </div>
   </body>
 </html>
