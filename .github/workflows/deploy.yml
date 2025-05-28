@@ -16,47 +16,56 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # 获取完整历史以便生成正确的提交信息
+          fetch-depth: 0 # 获取完整历史
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: "npm" # 添加缓存以加速依赖安装
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
 
-      # 设置基本URL环境变量，其他环境变量将使用本地.env文件
-      - name: Set base URL
-        run: |
-          if [ -f ".env" ]; then
-            echo "使用已有的.env文件"
-          else
-            echo "创建最小.env文件，仅包含基础URL"
-            echo "BASE_URL=/${{ github.event.repository.name }}" >> .env
-          fi
-
       - name: Build
-        run: npm run build
-        env:
-          BASE_URL: /${{ github.event.repository.name }}
-
-      # 修复 GitHub Pages 中的重定向问题
-      - name: Create 404.html
-        run: cp dist/index.html dist/404.html
-
-      # 确保 CNAME 不会被覆盖
-      - name: Copy CNAME
         run: |
-          if [ -f "CNAME" ]; then
-            cp CNAME dist/CNAME
+          echo "开始为 GitHub Pages 构建..."
+          # 设置GitHub Pages特定环境变量，这将由vite.config.ts使用
+          export GITHUB_ACTIONS=true
+          export GITHUB_REPOSITORY=${{ github.repository }}
+
+          # 执行构建命令 (来自package.json: "tsc && vite build")
+          npm run build
+
+          echo "构建完成。检查 dist 目录内容:"
+          ls -la dist/
+
+          # 确认 index.html 是否生成且有内容
+          if [ ! -f "dist/index.html" ] || ! [ -s "dist/index.html" ]; then
+            echo "错误: dist/index.html 未生成或为空!"
+            exit 1
           fi
 
-      - name: Deploy
+          # 从 client/404.html (如果存在) 或 dist/index.html 创建 dist/404.html
+          if [ -f "client/404.html" ]; then
+            echo "使用 client/404.html 作为 dist/404.html"
+            cp client/404.html dist/404.html
+          elif [ -f "dist/index.html" ]; then
+            echo "从 dist/index.html 创建 dist/404.html"
+            cp dist/index.html dist/404.html
+          else
+            echo "警告: 无法创建 dist/404.html 因为源文件不存在。"
+          fi
+
+          # 创建 .nojekyll 文件以禁用 GitHub Pages 的 Jekyll 处理
+          echo "创建 .nojekyll 文件"
+          touch dist/.nojekyll
+
+      - name: Deploy to GitHub Pages
+        if: success()
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist
-          branch: gh-pages
-          clean: true # 清理旧文件
-          commit-message: "Deploy: ${{ github.event.head_commit.message }}"
+          folder: dist # 构建输出的文件夹
+          branch: gh-pages # 部署到的分支
+          clean: true # 部署前清理目标分支
+          commit-message: "Deploy to GitHub Pages: ${{ github.event.head_commit.message }}"
