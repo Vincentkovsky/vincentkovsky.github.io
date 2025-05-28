@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public read access to contact submissions, but only admin write access
+    match /contactSubmissions/{submission} {
+      allow read: if request.auth != null && request.auth.token.admin == true;
+      allow create: if true; // Anyone can submit the contact form
+      allow update, delete: if request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Allow visitor location tracking
+    match /visitors/{visitor} {
+      allow read: if true; // Anyone can read visitor stats
+      allow create: if true; // Anyone can submit their location
+      allow update, delete: if request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

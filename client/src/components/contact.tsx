@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { createContactSubmission } from "@/lib/firebaseService";
 
 const contactSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -33,7 +33,7 @@ export default function Contact() {
 
   const contactMutation = useMutation({
     mutationFn: async (data: ContactFormData) => {
-      return apiRequest("POST", "/api/contact", data);
+      return createContactSubmission(data);
     },
     onSuccess: () => {
       toast({
@@ -67,7 +67,8 @@ export default function Contact() {
             Get In Touch
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            I'm always open to discussing new opportunities, interesting projects, or just having a friendly chat about technology.
+            I'm always open to discussing new opportunities, interesting projects, or just having a
+            friendly chat about technology.
           </p>
         </div>
 
@@ -87,7 +88,7 @@ export default function Contact() {
                   <p className="text-destructive text-sm mt-1">{errors.name.message}</p>
                 )}
               </div>
-              
+
               <div className="animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <Input
@@ -100,7 +101,7 @@ export default function Contact() {
                   <p className="text-destructive text-sm mt-1">{errors.email.message}</p>
                 )}
               </div>
-              
+
               <div className="animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
                 <label className="block text-sm font-medium mb-2">Message</label>
                 <Textarea
@@ -113,7 +114,7 @@ export default function Contact() {
                   <p className="text-destructive text-sm mt-1">{errors.message.message}</p>
                 )}
               </div>
-              
+
               <Button
                 type="submit"
                 disabled={isSubmitting}
@@ -136,16 +137,23 @@ export default function Contact() {
                   </div>
                   <div>
                     <p className="font-semibold text-gradient">Email</p>
-                    <p className="text-muted-foreground hover:text-primary transition-colors duration-300">vincent.jin@icloud.com</p>
+                    <p className="text-muted-foreground hover:text-primary transition-colors duration-300">
+                      vincent.jin@icloud.com
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-all duration-300 hover-glow animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+                <div
+                  className="flex items-center space-x-4 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-all duration-300 hover-glow animate-fade-in-up"
+                  style={{ animationDelay: "0.1s" }}
+                >
                   <div className="w-12 h-12 bg-gradient-to-r from-primary to-blue-500 rounded-lg flex items-center justify-center animate-pulse-slow">
                     <MapPin className="text-primary-foreground text-xl" />
                   </div>
                   <div>
                     <p className="font-semibold text-gradient">Location</p>
-                    <p className="text-muted-foreground hover:text-primary transition-colors duration-300">China</p>
+                    <p className="text-muted-foreground hover:text-primary transition-colors duration-300">
+                      China
+                    </p>
                   </div>
                 </div>
               </div>

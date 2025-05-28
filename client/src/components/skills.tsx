@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Code, Wrench } from "lucide-react";
-import { 
-  SiReact, 
-  SiNodedotjs, 
-  SiPython, 
-  SiGit, 
-  SiDocker, 
-  SiAmazonwebservices 
+import {
+  SiReact,
+  SiNodedotjs,
+  SiPython,
+  SiGit,
+  SiDocker,
+  SiAmazonwebservices,
 } from "react-icons/si";
 
 interface Skill {
@@ -55,7 +55,11 @@ export default function Skills() {
             </h3>
             <div className="space-y-6">
               {technicalSkills.map((skill, index) => (
-                <div key={skill.name} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+                <div
+                  key={skill.name}
+                  className="animate-fade-in-up"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
                   <div className="flex justify-between mb-2">
                     <span className="font-medium">{skill.name}</span>
                     <span className="text-primary font-mono font-bold">{skill.percentage}%</span>
@@ -100,7 +104,9 @@ export default function Skills() {
                     className="text-3xl mb-2 mx-auto group-hover:scale-125 transition-transform duration-300 animate-pulse-slow"
                     style={{ color: tool.color }}
                   />
-                  <p className="font-medium text-sm group-hover:text-primary transition-colors duration-300">{tool.name}</p>
+                  <p className="font-medium text-sm group-hover:text-primary transition-colors duration-300">
+                    {tool.name}
+                  </p>
                 </div>
               ))}
             </div>

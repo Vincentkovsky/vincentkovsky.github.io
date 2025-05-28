@@ -1,0 +1,17 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+    "mikestead.dotenv",
+    "editorconfig.editorconfig",
+    "streetsidesoftware.code-spell-checker",
+    "usernamehw.errorlens",
+    "eamodio.gitlens",
+    "wix.vscode-import-cost",
+    "christian-kohler.path-intellisense",
+    "formulahendry.auto-rename-tag",
+    "bierner.markdown-preview-github-styles"
+  ]
+}
