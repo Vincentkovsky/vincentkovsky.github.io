@@ -1,5 +1,5 @@
 import { Briefcase, Globe } from "lucide-react";
-import VisitorStats from "./visitor-stats";
+import VisitorStats from "@/components/visitor-stats";
 
 const experiences = [
   {
@@ -66,7 +66,7 @@ export default function Experience() {
             </div>
           </div>
 
-          {/* Actual Visitor Stats Component */}
+          {/* Visitor Geography Section */}
           <div>
             <h2 className="text-3xl font-bold mb-8 text-gradient flex items-center">
               <Globe className="mr-3" />
@@ -75,9 +75,8 @@ export default function Experience() {
                 Featured
               </span>
             </h2>
-            <div className="bg-card rounded-xl p-6 border border-border card-hover-effect">
-              <VisitorStats isEmbedded={true} />
-            </div>
+            {/* The VisitorStats component is now styled to match the design */}
+            <VisitorStats />
           </div>
         </div>
       </div>

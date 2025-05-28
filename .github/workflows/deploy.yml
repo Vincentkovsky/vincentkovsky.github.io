@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch: # 允许手动触发工作流
 
 permissions:
   contents: write
@@ -14,20 +15,48 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # 获取完整历史以便生成正确的提交信息
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: "npm" # 添加缓存以加速依赖安装
 
       - name: Install dependencies
         run: npm ci
 
+      # 设置基本URL环境变量，其他环境变量将使用本地.env文件
+      - name: Set base URL
+        run: |
+          if [ -f ".env" ]; then
+            echo "使用已有的.env文件"
+          else
+            echo "创建最小.env文件，仅包含基础URL"
+            echo "BASE_URL=/${{ github.event.repository.name }}" >> .env
+          fi
+
       - name: Build
         run: npm run build
+        env:
+          BASE_URL: /${{ github.event.repository.name }}
+
+      # 修复 GitHub Pages 中的重定向问题
+      - name: Create 404.html
+        run: cp dist/index.html dist/404.html
+
+      # 确保 CNAME 不会被覆盖
+      - name: Copy CNAME
+        run: |
+          if [ -f "CNAME" ]; then
+            cp CNAME dist/CNAME
+          fi
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist
           branch: gh-pages
+          clean: true # 清理旧文件
+          commit-message: "Deploy: ${{ github.event.head_commit.message }}"

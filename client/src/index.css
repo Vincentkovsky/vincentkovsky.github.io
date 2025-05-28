@@ -166,6 +166,17 @@
   width: 100%;
   height: 100%;
   background-color: #1a1b26;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.map-tiles-dark {
+  filter: brightness(0.7) saturate(1.2) hue-rotate(5deg);
+  transition: filter 0.3s ease;
+}
+
+.map-tiles-dark:hover {
+  filter: brightness(0.8) saturate(1.5) hue-rotate(0deg);
 }
 
 .leaflet-popup-content-wrapper {
@@ -200,21 +211,148 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 10px;
-  height: 10px;
-  background: rgba(59, 130, 246, 0.5);
-  border-radius: 50%;
+  width: 100%;
+  height: 100%;
   transform: translate(-50%, -50%);
-  animation: pulse 2s infinite;
+  border-radius: 50%;
+  background-color: rgba(16, 185, 129, 0.3);
+  animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
   0% {
     transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0.4;
   }
   100% {
-    transform: translate(-50%, -50%) scale(3);
+    transform: translate(-50%, -50%) scale(2);
     opacity: 0;
   }
+}
+
+.custom-cluster-icon {
+  background-color: rgba(16, 185, 129, 0.6);
+}
+
+.cluster-marker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+  transition: all 0.3s ease;
+  animation: pulse-slow 4s ease infinite;
+}
+
+.cluster-marker.small {
+  background-color: rgba(59, 130, 246, 0.8);
+  width: 30px;
+  height: 30px;
+}
+
+.cluster-marker.medium {
+  background-color: rgba(245, 158, 11, 0.8);
+  width: 35px;
+  height: 35px;
+}
+
+.cluster-marker.large {
+  background-color: rgba(239, 68, 68, 0.8);
+  width: 40px;
+  height: 40px;
+}
+
+.cluster-marker:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
+}
+
+.visitor-popup .leaflet-popup-content {
+  width: 200px !important;
+}
+
+.marker-inner {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #3b82f6);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+  transition: all 0.3s ease;
+}
+
+.marker-inner:hover {
+  transform: scale(1.3);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 1);
+}
+
+.leaflet-control-container .leaflet-top {
+  top: 10px;
+}
+
+.leaflet-control-container .leaflet-right {
+  right: 10px;
+}
+
+.leaflet-control-zoom {
+  border: none !important;
+  background-color: rgba(30, 41, 59, 0.7) !important;
+  backdrop-filter: blur(5px);
+}
+
+.leaflet-control-zoom a {
+  background-color: transparent !important;
+  color: #c0caf5 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: rgba(16, 185, 129, 0.3) !important;
+  color: white !important;
+}
+
+.legend {
+  background-color: rgba(30, 41, 59, 0.7);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.legend strong {
+  color: #7aa2f7;
+}
+
+/* Visitor marker animation */
+.visitor-marker {
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Enhanced tooltip styles */
+.custom-tooltip {
+  border: none !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(5px) !important;
+  font-family: "Inter", sans-serif !important;
 }

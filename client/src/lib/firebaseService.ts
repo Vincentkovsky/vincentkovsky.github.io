@@ -10,6 +10,10 @@ import {
   getCountFromServer,
   serverTimestamp,
   FieldValue,
+  updateDoc,
+  doc,
+  getDoc,
+  setDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -23,18 +27,39 @@ export interface ContactSubmission {
 
 export interface VisitorData {
   id?: string;
-  ip?: string;
-  country?: string;
-  region?: string;
-  city?: string;
-  latitude?: number;
-  longitude?: number;
-  browser?: string;
-  os?: string;
-  device?: string;
-  timestamp: Date | Timestamp | FieldValue;
-  referrer?: string;
-  path?: string;
+  asn?: string | null;
+  city?: string | null;
+  continent_code?: string | null;
+  country?: string | null;
+  country_area?: number | null;
+  country_calling_code?: string | null;
+  country_capital?: string | null;
+  country_code?: string | null;
+  country_code_iso3?: string | null;
+  country_name?: string | null;
+  country_population?: number | null;
+  country_tld?: string | null;
+  currency?: string | null;
+  currency_name?: string | null;
+  in_eu?: boolean | null;
+  ip?: string | null;
+  languages?: string | null;
+  lastVisit?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  network?: string | null;
+  org?: string | null;
+  postal?: string | null;
+  referrer?: string | null;
+  region?: string | null;
+  region_code?: string | null;
+  screenSize?: string | null;
+  timestamp: string | Date | Timestamp | FieldValue;
+  timezone?: string | null;
+  userAgent?: string | null;
+  utc_offset?: string | null;
+  version?: string | null;
+  visitCount?: number | null;
 }
 
 export interface CountryCount {
@@ -62,120 +87,289 @@ export interface VisitorLocation {
 export const recordVisitorLocation = async () => {
   try {
     // Get visitor's IP and geolocation data
-    const response = await fetch("https://ipapi.co/json/");
-    const data = await response.json();
-
-    // Get browser and OS info
-    const userAgent = navigator.userAgent;
-    const browser = detectBrowser(userAgent);
-    const os = detectOS(userAgent);
-    const device = detectDevice(userAgent);
-
-    // Create visitor record
-    const visitorData: Omit<VisitorData, "id"> = {
-      ip: data.ip,
-      country: data.country_name,
-      region: data.region,
-      city: data.city,
-      latitude: data.latitude,
-      longitude: data.longitude,
-      browser,
-      os,
-      device,
-      timestamp: serverTimestamp(),
-      referrer: document.referrer || undefined,
-      path: window.location.pathname,
+    let geoData = {
+      ip: "0.0.0.0",
+      country: "Unknown",
+      country_name: "Unknown",
+      city: "Unknown",
+      region: null,
+      region_code: null,
+      loc: "0,0",
+      timezone: null,
+      org: null,
+      postal: null,
     };
 
-    // Check if this IP has visited in the last 24 hours
-    const oneDayAgo = new Date();
-    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+    try {
+      // Try with ipinfo API
+      const response = await fetch("https://ipinfo.io/json", {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
 
-    const visitorQuery = query(
-      collection(db, "visitors"),
-      where("ip", "==", data.ip),
-      where("timestamp", ">=", oneDayAgo),
-      limit(1)
-    );
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Successfully fetched location from ipinfo");
 
-    const visitorSnapshot = await getCountFromServer(visitorQuery);
+        // 合并数据，确保所有必要字段存在
+        geoData = {
+          ...geoData,
+          ...data,
+          // ipinfo.io 没有提供 country_name，使用 country 代替
+          country_name: data.country || "Unknown",
+        };
+      } else {
+        throw new Error(`Geolocation API failed with status: ${response.status}`);
+      }
+    } catch (geoError) {
+      console.warn("Error fetching geolocation data, trying alternative API", geoError);
 
-    // Only add new record if this IP hasn't visited in 24 hours
-    if (visitorSnapshot.data().count === 0) {
-      await addDoc(collection(db, "visitors"), visitorData);
+      try {
+        // Try another free API as backup
+        const response = await fetch(
+          "https://api.ipgeolocation.io/ipgeo?apiKey=API_KEY", // 您需要替换为自己的API密钥
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          // 合并数据，确保所有必要字段存在
+          geoData = {
+            ...geoData,
+            ...data,
+          };
+          console.log("Successfully fetched location from ipgeolocation");
+        } else {
+          throw new Error("Alternative API also failed");
+        }
+      } catch (altError) {
+        console.warn("All geolocation APIs failed, using minimal data", altError);
+      }
     }
 
-    return visitorData;
+    // 打印 geoData 进行调试
+    console.log("Geolocation data:", geoData);
+
+    // Create visitor record
+    const screenSize = `${window.innerWidth}x${window.innerHeight}`;
+
+    // 构建访问者数据
+    const visitorData: Omit<VisitorData, "id"> = {
+      ip: geoData.ip,
+      city: geoData.city,
+      country: geoData.country,
+      country_name: geoData.country_name,
+      region: geoData.region || null,
+      region_code: geoData.region_code || null,
+      // ipinfo 使用 "loc": "latitude,longitude" 格式
+      latitude: geoData.loc ? parseFloat(geoData.loc.split(",")[0]) || 0 : 0,
+      longitude: geoData.loc ? parseFloat(geoData.loc.split(",")[1]) || 0 : 0,
+      timezone: geoData.timezone || null,
+      org: geoData.org || null,
+      postal: geoData.postal || null,
+      userAgent: navigator.userAgent,
+      referrer: document.referrer || "",
+      screenSize: screenSize,
+      timestamp: new Date().toISOString(),
+      visitCount: 1,
+      lastVisit: new Date().toISOString(),
+    };
+
+    let isNewVisitor = false;
+    let existingDocId = null;
+
+    // Check if this IP has visited before
+    try {
+      const visitorQuery = query(
+        collection(db, "visitors"),
+        where("ip", "==", geoData.ip),
+        limit(1)
+      );
+
+      const visitorSnapshot = await getDocs(visitorQuery);
+
+      if (visitorSnapshot.empty) {
+        // New visitor
+        isNewVisitor = true;
+        const docRef = await addDoc(collection(db, "visitors"), visitorData);
+        existingDocId = docRef.id;
+      } else {
+        // Existing visitor - update visit count and last visit time
+        const visitorDoc = visitorSnapshot.docs[0];
+        existingDocId = visitorDoc.id;
+        const currentData = visitorDoc.data();
+        const newVisitCount = (currentData.visitCount || 0) + 1;
+
+        await updateDoc(visitorDoc.ref, {
+          visitCount: newVisitCount,
+          lastVisit: new Date().toISOString(),
+        });
+      }
+
+      // If this is a new visitor, update the statistics collection
+      if (isNewVisitor) {
+        await updateVisitorStats(visitorData);
+      }
+
+      // Add the document ID to the visitor data before returning
+      return {
+        ...visitorData,
+        id: existingDocId,
+      };
+    } catch (dbError) {
+      console.warn("Firestore error when recording visitor", dbError);
+      // Try adding visitor without checking for duplicates
+      try {
+        const docRef = await addDoc(collection(db, "visitors"), visitorData);
+        // Still try to update statistics
+        await updateVisitorStats(visitorData);
+        return {
+          ...visitorData,
+          id: docRef.id,
+        };
+      } catch (addError) {
+        console.error("Failed to add visitor to Firestore", addError);
+        return visitorData; // Return data without ID
+      }
+    }
   } catch (error) {
     console.error("Error recording visitor location:", error);
-    // Fail silently - don't block the user experience
-    return null;
+    // Return minimal data to avoid UI errors
+    return {
+      ip: "0.0.0.0",
+      country: "Unknown",
+      country_name: "Unknown",
+      city: "Unknown",
+      timestamp: new Date().toISOString(),
+    };
   }
 };
 
 /**
- * Get visitor statistics from Firestore
+ * Update visitor statistics in the statistics collection
+ */
+export async function updateVisitorStats(visitorData: Omit<VisitorData, "id">) {
+  try {
+    // Get the stats document
+    const statsRef = doc(db, "statistics", "visitorStats");
+    const statsDoc = await getDoc(statsRef);
+
+    // 确保我们有有效的城市和国家名称
+    const cityName = visitorData.city || "Unknown";
+    const countryName = visitorData.country_name || visitorData.country || "Unknown";
+    const cityKey = `${cityName}, ${countryName}`;
+
+    if (statsDoc.exists()) {
+      // Update existing stats
+      const currentStats = statsDoc.data();
+
+      // Get current values or default to 0
+      const cities = currentStats.cities || {};
+      const cityCount = cities[cityKey] || 0;
+
+      const countries = currentStats.countries || {};
+      const countryCount = countries[countryName] || 0;
+
+      // Update the stats document with new counts
+      const updates: Record<string, any> = {
+        lastUpdated: new Date().toISOString(),
+      };
+
+      updates[`cities.${cityKey}`] = cityCount + 1;
+      updates[`countries.${countryName}`] = countryCount + 1;
+      updates.totalVisitors = (currentStats.totalVisitors || 0) + 1;
+
+      await updateDoc(statsRef, updates);
+    } else {
+      // Create new stats document with properly structured data
+      await setDoc(statsRef, {
+        cities: {
+          [cityKey]: 1,
+        },
+        countries: {
+          [countryName]: 1,
+        },
+        totalVisitors: 1,
+        lastUpdated: new Date().toISOString(),
+      });
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error updating visitor statistics:", error);
+    return false;
+  }
+}
+
+/**
+ * Gets visitor statistics for the dashboard
  */
 export const getVisitorStats = async () => {
   try {
-    // Total unique visitors (IPs)
-    const uniqueIpsSnapshot = await getCountFromServer(collection(db, "visitors"));
-    const totalVisitors = uniqueIpsSnapshot.data().count;
+    // 首先从 statistics 集合获取统计数据
+    const statsRef = doc(db, "statistics", "visitorStats");
+    const statsDoc = await getDoc(statsRef);
 
-    // Visitors by country
-    const visitorsSnapshot = await getDocs(collection(db, "visitors"));
-    const visitorsByCountry: Record<string, number> = {};
-    const visitorsByCity: Record<string, number> = {};
+    let totalVisitors = 0;
+    let topCountries: CountryCount[] = [];
+    let topCities: CityCount[] = [];
+    let lastUpdated: string | undefined;
+
+    if (statsDoc.exists()) {
+      const statsData = statsDoc.data();
+      totalVisitors = statsData.totalVisitors || 0;
+      lastUpdated = statsData.lastUpdated;
+
+      // 处理国家数据
+      if (statsData.countries) {
+        topCountries = Object.entries(statsData.countries)
+          .map(([country, count]) => ({
+            country,
+            count: count as number,
+          }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5);
+      }
+
+      // 处理城市数据
+      if (statsData.cities) {
+        topCities = Object.entries(statsData.cities)
+          .map(([city, count]) => ({
+            city,
+            count: count as number,
+          }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5);
+      }
+    }
+
+    // 获取最近的访问者记录
+    const visitorsQuery = query(
+      collection(db, "visitors"),
+      orderBy("timestamp", "desc"),
+      limit(20)
+    );
+
+    const visitorsSnapshot = await getDocs(visitorsQuery);
+    const recentVisitors: VisitorLocation[] = [];
 
     visitorsSnapshot.forEach((doc) => {
       const data = doc.data();
-
-      // Count by country
-      if (data.country) {
-        visitorsByCountry[data.country] = (visitorsByCountry[data.country] || 0) + 1;
-      }
-
-      // Count by city
-      if (data.city && data.country) {
-        const location = `${data.city}, ${data.country}`;
-        visitorsByCity[location] = (visitorsByCity[location] || 0) + 1;
-      }
-    });
-
-    // Get top countries
-    const topCountries: CountryCount[] = Object.entries(visitorsByCountry)
-      .map(([country, count]) => ({ country, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
-
-    // Get top cities
-    const topCities: CityCount[] = Object.entries(visitorsByCity)
-      .map(([city, count]) => ({ city, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
-
-    // Recent visitors with location data for map
-    const recentVisitorsQuery = query(
-      collection(db, "visitors"),
-      orderBy("timestamp", "desc"),
-      limit(100)
-    );
-
-    const recentVisitorsSnapshot = await getDocs(recentVisitorsQuery);
-    const recentVisitors: VisitorLocation[] = [];
-
-    recentVisitorsSnapshot.forEach((doc) => {
-      const data = doc.data();
-      if (data.latitude && data.longitude) {
-        recentVisitors.push({
-          id: doc.id,
-          country: data.country,
-          city: data.city,
-          latitude: data.latitude,
-          longitude: data.longitude,
-          timestamp: data.timestamp?.toDate() || new Date(),
-        });
-      }
+      recentVisitors.push({
+        id: doc.id,
+        city: data.city,
+        country: data.country_name || data.country,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        timestamp: new Date(data.timestamp),
+      });
     });
 
     return {
@@ -183,10 +377,11 @@ export const getVisitorStats = async () => {
       topCountries,
       topCities,
       recentVisitors,
+      lastUpdated,
     };
   } catch (error) {
     console.error("Error getting visitor stats:", error);
-    throw new Error("Failed to retrieve visitor statistics");
+    throw error;
   }
 };
 
