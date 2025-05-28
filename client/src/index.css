@@ -1,45 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: 222 84% 4.9%; /* #0f172a */
-  --foreground: 210 40% 98%; /* #f8fafc */
-  --card: 217 33% 17%; /* #1e293b */
-  --card-foreground: 210 40% 98%; /* #f8fafc */
-  --popover: 222 84% 4.9%; /* #0f172a */
-  --popover-foreground: 210 40% 98%; /* #f8fafc */
-  --primary: 160 84% 39%; /* #10b981 */
-  --primary-foreground: 222 84% 4.9%; /* #0f172a */
-  --secondary: 217 33% 17%; /* #1e293b */
-  --secondary-foreground: 210 40% 98%; /* #f8fafc */
-  --muted: 215 28% 17%; /* #1e293b */
-  --muted-foreground: 217 11% 65%; /* #94a3b8 */
-  --accent: 160 84% 39%; /* #10b981 */
-  --accent-foreground: 222 84% 4.9%; /* #0f172a */
-  --destructive: 0 63% 31%; /* #7f1d1d */
-  --destructive-foreground: 210 40% 98%; /* #f8fafc */
-  --border: 217 33% 17%; /* #1e293b */
-  --input: 217 33% 17%; /* #1e293b */
-  --ring: 160 84% 39%; /* #10b981 */
-  --radius: 0.5rem;
-  --chart-1: 160 84% 39%; /* #10b981 */
-  --chart-2: 221 83% 53%; /* #3b82f6 */
-  --chart-3: 45 93% 47%; /* #eab308 */
-  --chart-4: 27 96% 61%; /* #f97316 */
-  --chart-5: 10 79% 54%; /* #ef4444 */
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 217.2 32.6% 17.5%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+
+    --radius: 0.5rem;
+
+    /* Chart colors */
+    --chart-1: 160 84% 39%; /* #10b981 */
+    --chart-2: 221 83% 53%; /* #3b82f6 */
+    --chart-3: 45 93% 47%; /* #eab308 */
+    --chart-4: 27 96% 61%; /* #f97316 */
+    --chart-5: 10 79% 54%; /* #ef4444 */
+  }
 }
 
 @layer base {
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
   }
 
   html {
@@ -70,9 +83,15 @@
   }
 
   @keyframes gradient-shift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
   }
 
   .animate-float {
@@ -80,8 +99,13 @@
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
   }
 
   .animate-pulse-slow {
@@ -89,8 +113,13 @@
   }
 
   @keyframes pulse-slow {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
 
   .animate-fade-in-up {
@@ -129,5 +158,63 @@
 
   .skill-bar-glow {
     box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+  }
+}
+
+/* Leaflet Map Styling */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background-color: #1a1b26;
+}
+
+.leaflet-popup-content-wrapper {
+  background-color: #24283b;
+  color: #c0caf5;
+  border-radius: 0.5rem;
+}
+
+.leaflet-popup-tip {
+  background-color: #24283b;
+}
+
+.leaflet-popup-content h3 {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+  color: #7aa2f7;
+}
+
+.leaflet-popup-content p {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Custom marker pulse animation */
+.custom-marker {
+  position: relative;
+}
+
+.custom-marker::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: rgba(59, 130, 246, 0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 0;
   }
 }

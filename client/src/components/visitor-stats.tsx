@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   getVisitorStats,
@@ -21,9 +21,8 @@ import {
   CartesianGrid,
 } from "recharts";
 import { Globe, Users, MapPin, Activity } from "lucide-react";
-
-// No need for import, the .d.ts file will be automatically included by TypeScript
-// import "../types/google-maps";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
 // Map chart colors
 const COLORS = [
@@ -52,32 +51,28 @@ interface VisitorStatsProps {
 }
 
 export default function VisitorStats({ isEmbedded = false }: VisitorStatsProps) {
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const [map, setMap] = useState<L.Map | null>(null);
+  const [markers, setMarkers] = useState<L.Marker[]>([]);
 
   // Record visitor location on component mount
   useEffect(() => {
     recordVisitorLocation();
   }, []);
 
-  // Load Google Maps script
+  // Fix Leaflet default icon issue
   useEffect(() => {
-    if (!mapLoaded) {
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${
-        import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-      }&libraries=visualization`;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => setMapLoaded(true);
-      document.head.appendChild(script);
+    // Fix for Leaflet's default icon
+    // @ts-ignore: Unreachable code error - this is a known issue with Leaflet types
+    delete L.Icon.Default.prototype._getIconUrl;
 
-      return () => {
-        document.head.removeChild(script);
-      };
-    }
-  }, [mapLoaded]);
+    // @ts-ignore: Unreachable code error
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+      iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+      shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    });
+  }, []);
 
   // Fetch visitor statistics
   const {
@@ -90,145 +85,60 @@ export default function VisitorStats({ isEmbedded = false }: VisitorStatsProps) 
     refetchInterval: 60000, // Refetch every minute
   });
 
-  // Initialize map once data is loaded and map script is ready
+  // Initialize Leaflet map
   useEffect(() => {
-    if (mapLoaded && stats?.recentVisitors && stats.recentVisitors.length > 0 && !map) {
-      const mapElement = document.getElementById("visitor-map");
+    if (!mapContainerRef.current || map) return;
 
-      if (mapElement) {
-        // Create map
-        const newMap = new google.maps.Map(mapElement, {
-          center: { lat: 30, lng: 0 },
-          zoom: 2,
-          mapTypeId: "terrain",
-          styles: [
-            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-            {
-              featureType: "administrative.locality",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#d59563" }],
-            },
-            {
-              featureType: "poi",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#d59563" }],
-            },
-            {
-              featureType: "poi.park",
-              elementType: "geometry",
-              stylers: [{ color: "#263c3f" }],
-            },
-            {
-              featureType: "poi.park",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#6b9a76" }],
-            },
-            {
-              featureType: "road",
-              elementType: "geometry",
-              stylers: [{ color: "#38414e" }],
-            },
-            {
-              featureType: "road",
-              elementType: "geometry.stroke",
-              stylers: [{ color: "#212a37" }],
-            },
-            {
-              featureType: "road",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#9ca5b3" }],
-            },
-            {
-              featureType: "road.highway",
-              elementType: "geometry",
-              stylers: [{ color: "#746855" }],
-            },
-            {
-              featureType: "road.highway",
-              elementType: "geometry.stroke",
-              stylers: [{ color: "#1f2835" }],
-            },
-            {
-              featureType: "road.highway",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#f3d19c" }],
-            },
-            {
-              featureType: "transit",
-              elementType: "geometry",
-              stylers: [{ color: "#2f3948" }],
-            },
-            {
-              featureType: "transit.station",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#d59563" }],
-            },
-            {
-              featureType: "water",
-              elementType: "geometry",
-              stylers: [{ color: "#17263c" }],
-            },
-            {
-              featureType: "water",
-              elementType: "labels.text.fill",
-              stylers: [{ color: "#515c6d" }],
-            },
-            {
-              featureType: "water",
-              elementType: "labels.text.stroke",
-              stylers: [{ color: "#17263c" }],
-            },
-          ],
-        });
+    // Initialize the map with a dark theme
+    const leafletMap = L.map(mapContainerRef.current).setView([30, 0], 2);
 
-        setMap(newMap);
-      }
-    }
-  }, [mapLoaded, stats, map]);
+    // Add OpenStreetMap tile layer with dark theme
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: "abcd",
+      maxZoom: 19,
+    }).addTo(leafletMap);
+
+    setMap(leafletMap);
+
+    // Clean up on unmount
+    return () => {
+      leafletMap.remove();
+    };
+  }, [mapContainerRef, map]);
 
   // Add markers for visitors
   useEffect(() => {
     if (map && stats?.recentVisitors && stats.recentVisitors.length > 0) {
       // Clear old markers
-      markers.forEach((marker) => marker.setMap(null));
+      markers.forEach((marker) => marker.remove());
 
-      // Create new markers
+      // Create marker cluster group for better performance with many markers
       const newMarkers = stats.recentVisitors.map((visitor: VisitorLocation) => {
-        const marker = new google.maps.Marker({
-          position: {
-            lat: visitor.latitude,
-            lng: visitor.longitude,
-          },
-          map: map,
+        // Create custom icon with blue color
+        const visitorIcon = L.divIcon({
+          className: "custom-marker",
+          html: `<div style="background-color: #3b82f6; width: 10px; height: 10px; border-radius: 50%; border: 2px solid #1d4ed8;"></div>`,
+          iconSize: [14, 14],
+          iconAnchor: [7, 7],
+        });
+
+        // Create marker
+        const marker = L.marker([visitor.latitude, visitor.longitude], {
+          icon: visitorIcon,
           title: visitor.city ? `${visitor.city}, ${visitor.country}` : visitor.country,
-          animation: google.maps.Animation.DROP,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 7,
-            fillColor: "#3b82f6",
-            fillOpacity: 0.7,
-            strokeWeight: 1,
-            strokeColor: "#1d4ed8",
-          },
-        });
+        }).addTo(map);
 
-        // Add click event
-        const infoWindow = new google.maps.InfoWindow({
-          content: `
-            <div style="color: #000;">
-              <h3>${
-                visitor.city ? `${visitor.city}, ${visitor.country}` : visitor.country || "Unknown"
-              }</h3>
-              <p>Visited: ${new Date(visitor.timestamp).toLocaleString()}</p>
-            </div>
-          `,
-        });
-
-        marker.addListener("click", () => {
-          infoWindow.open(map, marker as unknown as google.maps.MVCObject);
-        });
+        // Add popup
+        marker.bindPopup(`
+          <div>
+            <h3>${
+              visitor.city ? `${visitor.city}, ${visitor.country}` : visitor.country || "Unknown"
+            }</h3>
+            <p>Visited: ${new Date(visitor.timestamp).toLocaleString()}</p>
+          </div>
+        `);
 
         return marker;
       });
@@ -251,7 +161,7 @@ export default function VisitorStats({ isEmbedded = false }: VisitorStatsProps) 
       <div className="space-y-4">
         {/* Compact Map */}
         <div
-          id="visitor-map"
+          ref={mapContainerRef}
           className="w-full h-[250px] rounded-lg overflow-hidden bg-secondary"
         ></div>
 
@@ -286,9 +196,9 @@ export default function VisitorStats({ isEmbedded = false }: VisitorStatsProps) 
                 >
                   <div className="flex items-center space-x-2">
                     <div
-                      className={`w-2 h-2 ${
+                      className={`w-2 h-2 bg-[${
                         COLORS[index % COLORS.length]
-                      } rounded-full animate-pulse-slow`}
+                      }] rounded-full animate-pulse-slow`}
                     />
                     <span className="text-xs font-medium">{country.country}</span>
                   </div>
@@ -420,7 +330,10 @@ export default function VisitorStats({ isEmbedded = false }: VisitorStatsProps) 
               <CardDescription>Geographic distribution of site visitors</CardDescription>
             </CardHeader>
             <CardContent>
-              <div id="visitor-map" className="w-full h-[400px] rounded-lg overflow-hidden"></div>
+              <div
+                ref={mapContainerRef}
+                className="w-full h-[400px] rounded-lg overflow-hidden"
+              ></div>
             </CardContent>
           </Card>
 
