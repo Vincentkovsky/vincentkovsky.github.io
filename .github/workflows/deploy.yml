@@ -27,23 +27,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # 创建包含 Firebase 配置的 .env 文件
-      - name: Create Firebase env file
-        run: |
-          echo "创建 Firebase 配置环境变量..."
-          cat > .env << EOL
-          # Firebase Configuration
-          VITE_FIREBASE_API_KEY=AIzaSyDQ1AaF0akvP-Q_Lu1xM_Eh0WWiiYVbJXw
-          VITE_FIREBASE_AUTH_DOMAIN=vincentkovsky.firebaseapp.com
-          VITE_FIREBASE_PROJECT_ID=vincentkovsky
-          VITE_FIREBASE_STORAGE_BUCKET=vincentkovsky.firebasestorage.app
-          VITE_FIREBASE_MESSAGING_SENDER_ID=773913920947
-          VITE_FIREBASE_APP_ID=1:773913920947:web:d4f51c8c4b81c6fe4577c6
-          EOL
-
-          echo "环境变量文件创建完成"
-
       - name: Build
+        env:
+          # Firebase Configuration from GitHub Secrets
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
         run: |
           echo "开始为 GitHub Pages 构建..."
           npm run build
