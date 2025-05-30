@@ -14,30 +14,51 @@
       content="Portfolio showcasing innovative projects and expertise in modern web development technologies."
     />
     <meta property="og:type" content="website" />
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <!-- Favicon - 使用相对路径 -->
+    <link rel="icon" type="image/svg+xml" href="src/assets/favicon.svg" />
 
-    <!-- GitHub Pages SPA routing script -->
+    <!-- 在文档的<head>中添加base标签，确保相对URL都基于此 -->
+    <base href="" />
+
+    <!-- GitHub Pages SPA routing script - 改进版本 -->
     <script type="text/javascript">
-      // Single Page Apps for GitHub Pages
-      // MIT License
-      // https://github.com/rafgraph/spa-github-pages
-      (function (l) {
-        if (l.search[1] === "/") {
-          var decoded = l.search
+      // 检测当前环境并设置适当的base
+      (function () {
+        // 检测是否在GitHub Pages
+        const isGitHubPages =
+          window.location.hostname.includes("github.io") ||
+          window.location.hostname.includes("vincentjin.dev");
+
+        // 设置仓库名
+        const repoName = "PersonalWeb";
+
+        // 如果在GitHub Pages上，设置base href
+        if (isGitHubPages) {
+          document.querySelector("base").setAttribute("href", `/${repoName}/`);
+        } else {
+          document.querySelector("base").setAttribute("href", "/");
+        }
+
+        // 原有的SPA路由脚本
+        if (window.location.search[1] === "/") {
+          var decoded = window.location.search
             .slice(1)
             .split("&")
             .map(function (s) {
               return s.replace(/~and~/g, "&");
             })
             .join("?");
-          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+          window.history.replaceState(
+            null,
+            null,
+            window.location.pathname.slice(0, -1) + decoded + window.location.hash
+          );
         }
-      })(window.location);
+      })();
     </script>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="./src/main.tsx"></script>
+    <script type="module" src="src/main.tsx"></script>
   </body>
 </html>

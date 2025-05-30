@@ -1,4 +1,6 @@
 import { Github, Linkedin, Mail } from "lucide-react";
+import avatar from "@/assets/avatar.png";
+import favicon from "@/assets/favicon.svg";
 
 export default function Hero() {
   return (
@@ -22,7 +24,7 @@ export default function Hero() {
             <div className="w-full h-full rounded-full bg-background"></div>
           </div>
           <img
-            src="src/assets/avatar.png"
+            src={avatar}
             alt="Vincent Jin Profile Photo"
             className="w-32 h-32 md:w-40 md:h-40 rounded-full mx-auto object-cover relative z-10 hover-glow transition-all duration-300"
           />

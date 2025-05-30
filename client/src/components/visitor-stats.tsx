@@ -246,6 +246,13 @@ export default function VisitorStats() {
           mapInstanceRef.current = null;
         }
 
+        // Check if the container already has a map instance attached
+        if (mapContainerRef.current && (mapContainerRef.current as any)._leaflet_id) {
+          console.log("Container already has a map instance, cleaning up...");
+          // Force cleanup of any existing leaflet instances on this container
+          (mapContainerRef.current as any)._leaflet_id = null;
+        }
+
         // 确保地图容器完全渲染
         await new Promise((resolve) => setTimeout(resolve, 300));
 
@@ -270,29 +277,67 @@ export default function VisitorStats() {
           console.log("Creating map at container:", mapContainerRef.current);
 
           try {
-            // 先添加地图但不设置视图
-            mapInstanceRef.current = L.map(mapContainerRef.current, {
-              zoomControl: false,
-              attributionControl: false,
-            });
+            // Assign a unique ID to the container element
+            mapContainerRef.current.id = `map-container-${Date.now()}`;
 
-            // 添加图层
-            L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-              attribution:
-                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-              subdomains: "abcd",
-              maxZoom: 19,
-              className: "map-tiles-dark",
-            }).addTo(mapInstanceRef.current);
+            // Make sure any previous initialization attempts are cleaned up
+            if (typeof L.map.closePopup === "function") {
+              L.map.closePopup();
+            }
+
+            // Wrap map creation in a try/catch to handle any initialization errors
+            try {
+              // 先添加地图但不设置视图
+              mapInstanceRef.current = L.map(mapContainerRef.current, {
+                zoomControl: false,
+                attributionControl: false,
+                // Add a unique ID to avoid initialization conflicts
+                uniqueId: Date.now().toString(),
+              });
+
+              // 添加图层
+              L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+                attribution:
+                  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                subdomains: "abcd",
+                maxZoom: 19,
+                className: "map-tiles-dark",
+              }).addTo(mapInstanceRef.current);
+            } catch (mapCreateError) {
+              console.error("Error creating map:", mapCreateError);
+
+              // Try again with a delay
+              setTimeout(() => {
+                setMapInitialized(false);
+              }, 1000);
+              return;
+            }
 
             // 等待地图渲染
-            await new Promise((resolve) => setTimeout(resolve, 200));
+            await new Promise((resolve) => setTimeout(resolve, 300));
+
+            // 确保地图实例存在并已挂载
+            if (!mapInstanceRef.current || !mapInstanceRef.current._container) {
+              console.error("Map instance is not properly initialized");
+              setTimeout(() => {
+                setMapInitialized(false);
+              }, 1000);
+              return;
+            }
 
             // 强制更新地图大小
-            mapInstanceRef.current.invalidateSize(true);
-
-            // 然后设置视图
-            mapInstanceRef.current.setView([20, 0], 2);
+            try {
+              mapInstanceRef.current.invalidateSize(true);
+              // 然后设置视图
+              mapInstanceRef.current.setView([20, 0], 2);
+            } catch (sizeError) {
+              console.error("Error updating map size:", sizeError);
+              // Try again with a delay if this fails
+              setTimeout(() => {
+                setMapInitialized(false);
+              }, 1000);
+              return;
+            }
 
             // Make sure we have visitor data
             if (stats.recentVisitors && stats.recentVisitors.length > 0) {
@@ -306,63 +351,73 @@ export default function VisitorStats() {
                 ]);
 
               // Create heat layer if we have data
-              if (heatData.length > 0 && L.heatLayer) {
-                heatLayerRef.current = L.heatLayer(heatData, {
-                  radius: 15,
-                  blur: 15,
-                  maxZoom: 10,
-                  gradient: {
-                    0.1: "#4ADE80", // Light green
-                    0.3: "#22C55E", // Medium green
-                    0.5: "#16A34A", // Deep green
-                    0.7: "#15803D", // Deeper green
-                    1.0: "#14532D", // Darkest green
-                  },
-                }).addTo(mapInstanceRef.current);
+              if (heatData.length > 0 && L.heatLayer && mapInstanceRef.current) {
+                try {
+                  heatLayerRef.current = L.heatLayer(heatData, {
+                    radius: 15,
+                    blur: 15,
+                    maxZoom: 10,
+                    gradient: {
+                      0.1: "#4ADE80", // Light green
+                      0.3: "#22C55E", // Medium green
+                      0.5: "#16A34A", // Deep green
+                      0.7: "#15803D", // Deeper green
+                      1.0: "#14532D", // Darkest green
+                    },
+                  }).addTo(mapInstanceRef.current);
+                } catch (heatError) {
+                  console.error("Error adding heat layer:", heatError);
+                }
               }
 
               // Add markers for top cities with custom styling
               stats.topCities.slice(0, 5).forEach((city, index) => {
-                // Try to match city with a visitor location
-                const matchingVisitor = stats.recentVisitors.find(
-                  (v) => v.city && v.city.includes(city.city.split(",")[0])
-                );
+                try {
+                  // Try to match city with a visitor location
+                  const matchingVisitor = stats.recentVisitors.find(
+                    (v) => v.city && v.city.includes(city.city.split(",")[0])
+                  );
 
-                // If no match, use a random visitor location or calculate from known locations
-                let markerLocation;
-                if (matchingVisitor) {
-                  markerLocation = [matchingVisitor.latitude, matchingVisitor.longitude];
-                } else if (stats.recentVisitors.length > 0) {
-                  // Use a random visitor as fallback
-                  const randomVisitor =
-                    stats.recentVisitors[Math.floor(Math.random() * stats.recentVisitors.length)];
-                  markerLocation = [randomVisitor.latitude, randomVisitor.longitude];
-                } else {
-                  // Default fallback coordinates
-                  markerLocation = [20, index * 30 - 60]; // Space them out along the equator
+                  // If no match, use a random visitor location or calculate from known locations
+                  let markerLocation;
+                  if (matchingVisitor) {
+                    markerLocation = [matchingVisitor.latitude, matchingVisitor.longitude];
+                  } else if (stats.recentVisitors.length > 0) {
+                    // Use a random visitor as fallback
+                    const randomVisitor =
+                      stats.recentVisitors[Math.floor(Math.random() * stats.recentVisitors.length)];
+                    markerLocation = [randomVisitor.latitude, randomVisitor.longitude];
+                  } else {
+                    // Default fallback coordinates
+                    markerLocation = [20, index * 30 - 60]; // Space them out along the equator
+                  }
+
+                  // Use different colors for top locations
+                  const colorClass = locationColors[index % locationColors.length];
+                  const colorHex = getColorHexFromClass(colorClass);
+
+                  // Create pulsing marker
+                  if (mapInstanceRef.current) {
+                    const marker = L.circleMarker(markerLocation, {
+                      radius: 5,
+                      color: colorHex,
+                      fillColor: colorHex,
+                      fillOpacity: 0.8,
+                      className: "animate-pulse-slow",
+                    }).addTo(mapInstanceRef.current);
+
+                    // Add tooltip with custom styling
+                    marker.bindTooltip(
+                      `<div style="padding: 6px 10px; background-color: rgba(30, 41, 59, 0.95); border: 1px solid ${colorHex}; border-radius: 4px; color: #E2E8F0; font-size: 0.85rem;">
+                        <strong>${city.city}</strong><br/>
+                        Visitors: ${city.count}
+                      </div>`,
+                      { className: "custom-tooltip" }
+                    );
+                  }
+                } catch (markerError) {
+                  console.error("Error adding city marker:", markerError);
                 }
-
-                // Use different colors for top locations
-                const colorClass = locationColors[index % locationColors.length];
-                const colorHex = getColorHexFromClass(colorClass);
-
-                // Create pulsing marker
-                const marker = L.circleMarker(markerLocation, {
-                  radius: 5,
-                  color: colorHex,
-                  fillColor: colorHex,
-                  fillOpacity: 0.8,
-                  className: "animate-pulse-slow",
-                }).addTo(mapInstanceRef.current);
-
-                // Add tooltip with custom styling
-                marker.bindTooltip(
-                  `<div style="padding: 6px 10px; background-color: rgba(30, 41, 59, 0.95); border: 1px solid ${colorHex}; border-radius: 4px; color: #E2E8F0; font-size: 0.85rem;">
-                    <strong>${city.city}</strong><br/>
-                    Visitors: ${city.count}
-                  </div>`,
-                  { className: "custom-tooltip" }
-                );
               });
 
               // 设置一个默认的用户位置（优先使用当前位置，回退到最近访问者）
@@ -389,96 +444,105 @@ export default function VisitorStats() {
 
               // 如果有用户位置，添加标记
               if (hasUserLocation) {
-                // 创建样式
-                const style = document.createElement("style");
-                style.textContent = `
-                  .your-location-marker {
-                    position: relative;
-                  }
-                  .pulse-ring {
-                    position: absolute;
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 50%;
-                    background: rgba(255, 71, 87, 0.3);
-                    top: 1px;
-                    left: 1px;
-                    animation: pulse 2s infinite;
-                  }
-                  @keyframes pulse {
-                    0% {
-                      transform: scale(1);
-                      opacity: 1;
-                    }
-                    70% {
-                      transform: scale(2);
-                      opacity: 0;
-                    }
-                    100% {
-                      transform: scale(1);
-                      opacity: 0;
-                    }
-                  }
-                  .your-location-tooltip {
-                    background-color: #ff4757;
-                    color: white;
-                    border: none;
-                    border-radius: 4px;
-                    padding: 5px 10px;
-                    font-weight: bold;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-                  }
-                `;
-                document.head.appendChild(style);
-
-                // 创建用户位置图标
-                const yourLocationIcon = L.divIcon({
-                  html: `<div class="your-location-marker">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff4757" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    <div class="pulse-ring"></div>
-                  </div>`,
-                  className: "custom-div-icon",
-                  iconSize: [32, 32],
-                  iconAnchor: [16, 16],
-                });
-
                 try {
+                  // 创建样式
+                  const style = document.createElement("style");
+                  style.textContent = `
+                    .your-location-marker {
+                      position: relative;
+                    }
+                    .pulse-ring {
+                      position: absolute;
+                      width: 30px;
+                      height: 30px;
+                      border-radius: 50%;
+                      background: rgba(255, 71, 87, 0.3);
+                      top: 1px;
+                      left: 1px;
+                      animation: pulse 2s infinite;
+                    }
+                    @keyframes pulse {
+                      0% {
+                        transform: scale(1);
+                        opacity: 1;
+                      }
+                      70% {
+                        transform: scale(2);
+                        opacity: 0;
+                      }
+                      100% {
+                        transform: scale(1);
+                        opacity: 0;
+                      }
+                    }
+                    .your-location-tooltip {
+                      background-color: #ff4757;
+                      color: white;
+                      border: none;
+                      border-radius: 4px;
+                      padding: 5px 10px;
+                      font-weight: bold;
+                      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                    }
+                  `;
+                  document.head.appendChild(style);
+
+                  // 创建用户位置图标
+                  const yourLocationIcon = L.divIcon({
+                    html: `<div class="your-location-marker">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff4757" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      <div class="pulse-ring"></div>
+                    </div>`,
+                    className: "custom-div-icon",
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16],
+                  });
+
                   // 确保地图准备就绪后再添加标记
                   setTimeout(() => {
                     if (mapInstanceRef.current) {
-                      // 添加用户位置标记
-                      const visitorMarker = L.marker([userLat, userLng], {
-                        icon: yourLocationIcon,
-                      }).addTo(mapInstanceRef.current);
+                      try {
+                        // 添加用户位置标记
+                        const visitorMarker = L.marker([userLat, userLng], {
+                          icon: yourLocationIcon,
+                        }).addTo(mapInstanceRef.current);
 
-                      visitorMarker.bindTooltip("Your Location", {
-                        permanent: true,
-                        direction: "top",
-                        offset: [0, -20],
-                        className: "your-location-tooltip",
-                      });
+                        visitorMarker.bindTooltip("Your Location", {
+                          permanent: true,
+                          direction: "top",
+                          offset: [0, -20],
+                          className: "your-location-tooltip",
+                        });
 
-                      // 更新地图大小后再设置视图
-                      mapInstanceRef.current.invalidateSize(true);
-                      // 安全地设置视图
-                      mapInstanceRef.current.setView([userLat, userLng], 5, {
-                        animate: false,
-                      });
+                        // 更新地图大小后再设置视图
+                        mapInstanceRef.current.invalidateSize(true);
+                        // 安全地设置视图
+                        mapInstanceRef.current.setView([userLat, userLng], 5, {
+                          animate: false,
+                        });
+                      } catch (markerError) {
+                        console.error("Error adding marker or updating map:", markerError);
+                      }
                     }
                   }, 300);
-                } catch (markerError) {
-                  console.error("Error adding user location marker:", markerError);
+                } catch (locationError) {
+                  console.error("Error setting up user location:", locationError);
                 }
               }
             }
 
             // 延迟标记地图为已初始化，确保所有操作完成
             setTimeout(() => {
-              console.log("Map successfully initialized");
-              setMapInitialized(true);
+              if (mapInstanceRef.current && mapInstanceRef.current._container) {
+                console.log("Map successfully initialized");
+                setMapInitialized(true);
+              } else {
+                console.warn("Map initialization failed or was interrupted");
+                setMapInitialized(false);
+              }
             }, 500);
           } catch (mapError: any) {
             console.error("Error creating map instance:", mapError);
@@ -498,9 +562,21 @@ export default function VisitorStats() {
     return () => {
       if (mapInstanceRef.current) {
         console.log("Cleaning up map instance");
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-        setMapInitialized(false);
+        try {
+          // Remove all event listeners
+          mapInstanceRef.current.off();
+          // Remove all layers
+          mapInstanceRef.current.eachLayer((layer: any) => {
+            mapInstanceRef.current.removeLayer(layer);
+          });
+          // Remove the map
+          mapInstanceRef.current.remove();
+          mapInstanceRef.current = null;
+          // Reset initialization flag
+          setMapInitialized(false);
+        } catch (error) {
+          console.error("Error during map cleanup:", error);
+        }
       }
     };
   }, [loading, stats, visitorLocation]);
