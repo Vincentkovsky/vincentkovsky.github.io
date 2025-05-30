@@ -30,9 +30,7 @@ jobs:
       - name: Build
         run: |
           echo "开始为 GitHub Pages 构建..."
-          # 设置GitHub Pages特定环境变量，这将由vite.config.ts使用
-          export GITHUB_ACTIONS=true
-          export GITHUB_REPOSITORY=${{ github.repository }}
+          # 不再需要设置环境变量，因为我们已经在 vite.config.ts 中固定了 base path 为 "/"
 
           # 执行构建命令 (来自package.json: "tsc && vite build")
           npm run build
@@ -61,11 +59,14 @@ jobs:
           echo "创建 .nojekyll 文件"
           touch dist/.nojekyll
 
-      - name: Deploy to GitHub Pages
+      # 直接部署到 vincentkovsky.github.io 仓库
+      - name: Deploy to vincentkovsky.github.io
         if: success()
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist # 构建输出的文件夹
-          branch: gh-pages # 部署到的分支
-          clean: true # 部署前清理目标分支
-          commit-message: "Deploy to GitHub Pages: ${{ github.event.head_commit.message }}"
+          folder: dist
+          token: ${{ secrets.GH_PAGES_TOKEN }}
+          repository-name: Vincentkovsky/vincentkovsky.github.io
+          branch: main
+          clean: true
+          commit-message: "Deploy: ${{ github.event.head_commit.message }}"

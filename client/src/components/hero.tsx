@@ -1,6 +1,5 @@
 import { Github, Linkedin, Mail } from "lucide-react";
 import avatar from "@/assets/avatar.png";
-import favicon from "@/assets/favicon.svg";
 
 export default function Hero() {
   return (
