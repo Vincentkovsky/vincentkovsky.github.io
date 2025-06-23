@@ -51,19 +51,25 @@ export default function Hero() {
           style={{ animationDelay: "0.6s" }}
         >
           <a
-            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://github.com/Vincentkovsky"
             className="text-2xl text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-125 hover-glow p-3 rounded-full"
           >
             <Github />
           </a>
           <a
-            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://www.linkedin.com/in/wenzheng-jin/"
             className="text-2xl text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-125 hover-glow p-3 rounded-full"
           >
             <Linkedin />
           </a>
           <a
-            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="mailto:vincent.jin6@icloud.com"
             className="text-2xl text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-125 hover-glow p-3 rounded-full"
           >
             <Mail />

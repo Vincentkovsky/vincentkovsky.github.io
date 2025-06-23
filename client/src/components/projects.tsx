@@ -1,37 +1,44 @@
 import { ExternalLink, Github, Laptop } from "lucide-react";
+import CregisRAG from "../assets/CregisRAG.png";
+import anchor from "../assets/Anchor.png";
 
 const projects = [
   {
-    title: "Resume Builder",
-    description: "A comprehensive web app featuring professional resume templates with customizable layouts and real-time preview functionality.",
-    image: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-    tags: ["React", "TypeScript", "Tailwind"],
-    github: "#",
+    title: "AI-Enhanced Flood Simulation System",
+    description: `Web-based flood simulation system using Vue 3 and FloodTransformer for real-time prediction, with ultra fast inference and results post-processing.`,
+    image:
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+    tags: ["Vue 3", "TypeScript", "DeckGL", "FastAPI", "FloodTransformer"],
+    github: "https://github.com/Vincentkovsky/SES_Fullstack_App",
     live: "#",
   },
   {
-    title: "Code Analyzer",
-    description: "Smart tool for analyzing code repositories to identify patterns, potential bugs, and improvement opportunities using machine learning.",
-    image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-    tags: ["Python", "Machine Learning", "FastAPI"],
-    github: "#",
+    title: "CregisRAG",
+    description:
+      "CregisRAG is an intelligent question-answering system leveraging Retrieval-Augmented Generation (RAG) technology, which integrates large language models (LLMs) with precision retrieval from multi-source knowledge bases to deliver accurate, traceable responses and adaptive learning capabilities.",
+    image: CregisRAG,
+    tags: ["Python", "JavaScript", "FastAPI", "Chroma", "LangChain"],
+    github: "https://github.com/Vincentkovsky/CregisRAG",
     live: "#",
   },
   {
-    title: "Business Dashboard",
-    description: "A comprehensive dashboard for monitoring smart home devices with React and TypeScript, featuring real-time data visualization.",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-    tags: ["React", "D3.js", "WebSocket"],
-    github: "#",
+    title: "Pressure Sense iOS App",
+    description:
+      "PressureSense is an iOS application designed to help users monitor and manage their stress levels through continuous health data analysis. The app provides real-time stress monitoring, detailed analysis, and personalized recommendations.",
+    image:
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+    tags: ["SwiftUI", "Cursor"],
+    github: "https://github.com/Vincentkovsky/PressureSense",
     live: "#",
   },
   {
-    title: "E-Commerce Platform",
-    description: "A full-featured online store with product management, payment processing, and order tracking capabilities built with modern technologies.",
-    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-    tags: ["Next.js", "Stripe", "MongoDB"],
-    github: "#",
-    live: "#",
+    title: "Anchor - News aggregator iOS App",
+    description:
+      "Anchor is an iOS news aggregator app that integrates bionic reading technology to enhance content consumption efficiency and focus through optimized text visualization.",
+    image: anchor,
+    tags: ["Swift", "SafariKit"],
+    github: "https://github.com/Vincentkovsky/anchor",
+    live: "https://www.youtube.com/watch?v=hjS4i4i0Lkg&ab_channel=%E7%A9%BA%E8%85%B9%E5%88%B0%E5%BA%95%E8%83%BD%E4%B8%8D%E8%83%BD%E5%90%83%E9%A5%AD",
   },
 ];
 
@@ -48,7 +55,7 @@ export default function Projects() {
             A showcase of my recent work spanning web applications, tools, and creative experiments
           </p>
         </div>
-        
+
         <div className="grid md:grid-cols-2 gap-8">
           {projects.map((project, index) => (
             <div
@@ -68,16 +75,14 @@ export default function Projects() {
                 <h3 className="text-xl font-bold mb-2 text-gradient group-hover:scale-105 transition-transform duration-200">
                   {project.title}
                 </h3>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
-                  {project.description}
-                </p>
+                <p className="text-muted-foreground mb-4 leading-relaxed">{project.description}</p>
                 <div className="flex justify-between items-center">
                   <div className="flex flex-wrap gap-2">
                     {project.tags.map((tag, tagIndex) => (
                       <span
                         key={tag}
                         className="bg-gradient-to-r from-primary/20 to-blue-500/20 text-primary px-3 py-1 rounded-full text-sm font-medium hover:from-primary/30 hover:to-blue-500/30 transition-all duration-300 animate-fade-in-up"
-                        style={{ animationDelay: `${(index * 200) + (tagIndex * 100)}ms` }}
+                        style={{ animationDelay: `${index * 200 + tagIndex * 100}ms` }}
                       >
                         {tag}
                       </span>
@@ -85,12 +90,16 @@ export default function Projects() {
                   </div>
                   <div className="flex space-x-3">
                     <a
+                      target="_blank"
+                      rel="noopener noreferrer"
                       href={project.github}
                       className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-125 hover-glow p-2 rounded-full"
                     >
                       <Github className="w-5 h-5" />
                     </a>
                     <a
+                      target="_blank"
+                      rel="noopener noreferrer"
                       href={project.live}
                       className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-125 hover-glow p-2 rounded-full"
                     >

@@ -71,9 +71,6 @@ export default function Experience() {
             <h2 className="text-3xl font-bold mb-8 text-gradient flex items-center">
               <Globe className="mr-3" />
               Visitor Geography
-              <span className="bg-gradient-to-r from-orange-500 to-red-500 text-background px-3 py-1 rounded-full text-sm font-medium ml-3 animate-pulse-slow">
-                Featured
-              </span>
             </h2>
             {/* The VisitorStats component is now styled to match the design */}
             <VisitorStats />
