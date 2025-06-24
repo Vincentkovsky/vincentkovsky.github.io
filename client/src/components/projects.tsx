@@ -1,13 +1,13 @@
 import { ExternalLink, Github, Laptop } from "lucide-react";
 import CregisRAG from "../assets/CregisRAG.png";
 import anchor from "../assets/Anchor.png";
+import flood from "../assets/flood.png";
 
 const projects = [
   {
     title: "AI-Enhanced Flood Simulation System",
     description: `Web-based flood simulation system using Vue 3 and FloodTransformer for real-time prediction, with ultra fast inference and results post-processing.`,
-    image:
-      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+    image: flood,
     tags: ["Vue 3", "TypeScript", "DeckGL", "FastAPI", "FloodTransformer"],
     github: "https://github.com/Vincentkovsky/SES_Fullstack_App",
     live: "#",
