@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 允许任何人提交联系表单
+    match /contactMessages/{messageId} {
+      // 允许创建但不允许读取、更新或删除
+      allow create: if true;
+    }
+
+    // 允许访问者统计数据写入
+    match /visitors/{visitorId} {
+      allow create: if true;
+      allow update: if true;
+    }
+
+    // 允许更新统计信息
+    match /statistics/{statId} {
+      allow read, write: if true;
+    }
+
+    // 其他集合的规则
+    match /{document=**} {
+      // 默认规则 - 拒绝所有访问
+      allow read, write: if false;
+    }
+  }
+}

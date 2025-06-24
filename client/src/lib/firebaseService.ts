@@ -81,6 +81,13 @@ export interface VisitorLocation {
   timestamp: Date;
 }
 
+// 联系表单数据类型
+export interface ContactFormData {
+  name: string;
+  email: string;
+  message: string;
+}
+
 /**
  * Records a visitor's geographic data in Firestore
  */
@@ -385,25 +392,42 @@ export const getVisitorStats = async () => {
   }
 };
 
-export const createContactSubmission = async (
-  data: Omit<ContactSubmission, "id" | "createdAt">
-) => {
+/**
+ * 创建联系表单提交
+ * @param data 联系表单数据
+ * @returns Promise 包含提交结果
+ */
+export async function createContactSubmission(data: ContactFormData) {
   try {
-    const docRef = await addDoc(collection(db, "contactSubmissions"), {
+    console.log("开始提交联系表单数据...", data);
+
+    // 添加时间戳和状态信息
+    const submissionData = {
       ...data,
       createdAt: Timestamp.now(),
-    });
-
-    return {
-      id: docRef.id,
-      ...data,
-      createdAt: new Date(),
+      status: "unread", // 可用于后续管理 (已读/未读/已回复)
     };
+
+    console.log("准备提交数据到 Firestore:", submissionData);
+
+    // 添加到 Firestore 的 contactMessages 集合
+    const docRef = await addDoc(collection(db, "contactMessages"), submissionData);
+    console.log("消息提交成功，ID:", docRef.id);
+
+    return { success: true, id: docRef.id };
   } catch (error) {
-    console.error("Error adding contact submission: ", error);
-    throw new Error("Failed to submit contact form");
+    console.error("提交消息时出错:", error);
+
+    // 添加更详细的错误信息
+    if (error instanceof Error) {
+      console.error("错误类型:", error.name);
+      console.error("错误消息:", error.message);
+      console.error("错误堆栈:", error.stack);
+    }
+
+    throw new Error(`提交消息失败: ${error instanceof Error ? error.message : "未知错误"}`);
   }
-};
+}
 
 export const getContactSubmissions = async () => {
   try {
@@ -459,4 +483,41 @@ function detectDevice(userAgent: string): string {
   if (userAgent.indexOf("Mobile") > -1) return "Mobile";
   else if (userAgent.indexOf("Tablet") > -1) return "Tablet";
   else return "Desktop";
+}
+
+/**
+ * 获取所有联系表单消息
+ * 注意：此函数应该只在管理页面使用，需要适当的身份验证
+ * @returns 联系表单消息列表
+ */
+export async function getContactMessages() {
+  try {
+    const messagesRef = collection(db, "contactMessages");
+    const q = query(messagesRef, orderBy("createdAt", "desc"));
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  } catch (error) {
+    console.error("Error fetching contact messages: ", error);
+    throw new Error("Failed to fetch contact messages");
+  }
+}
+
+/**
+ * 更新联系表单消息状态
+ * @param messageId 消息ID
+ * @param status 新状态 (read, replied, archived)
+ */
+export async function updateMessageStatus(messageId: string, status: string) {
+  try {
+    const messageRef = doc(db, "contactMessages", messageId);
+    await updateDoc(messageRef, { status });
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating message status: ", error);
+    throw new Error("Failed to update message status");
+  }
 }

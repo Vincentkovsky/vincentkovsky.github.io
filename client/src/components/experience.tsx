@@ -3,7 +3,7 @@ import VisitorStats from "@/components/visitor-stats";
 
 const experiences = [
   {
-    title: "Full Stack Developer",
+    title: "Full Stack Software Developer",
     company: "UTS",
     period: "2023 - Present",
     description:
