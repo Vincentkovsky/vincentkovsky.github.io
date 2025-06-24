@@ -7,15 +7,20 @@ service cloud.firestore {
       allow create: if true;
     }
 
-    // 允许访问者统计数据写入
-    match /visitors/{visitorId} {
+   // 允许匿名用户访问
+    match /visitors/{document=**} {
+      // 读取权限
+      allow read: if true;
+      // 创建权限
       allow create: if true;
+      // 更新权限 - 仅允许更新访问计数等
       allow update: if true;
     }
 
-    // 允许更新统计信息
-    match /statistics/{statId} {
-      allow read, write: if true;
+    // 统计数据
+    match /statistics/{document=**} {
+      allow read: if true;
+      allow write: if true;
     }
 
     // 其他集合的规则
