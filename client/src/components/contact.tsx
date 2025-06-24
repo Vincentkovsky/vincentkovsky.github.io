@@ -163,27 +163,35 @@ export default function Contact() {
               <h3 className="text-xl font-bold mb-6 text-gradient">Follow Me</h3>
               <div className="flex space-x-4">
                 <a
-                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://github.com/Vincentkovsky"
                   className="w-12 h-12 bg-secondary hover:bg-gradient-to-r hover:from-primary hover:to-blue-500 border border-border hover:border-primary rounded-lg flex items-center justify-center transition-all duration-300 group hover:scale-110 hover-glow animate-fade-in-up"
                 >
                   <Github className="text-xl group-hover:text-primary-foreground transition-colors duration-300" />
                 </a>
                 <a
-                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://www.linkedin.com/in/wenzheng-jin/"
                   className="w-12 h-12 bg-secondary hover:bg-gradient-to-r hover:from-primary hover:to-blue-500 border border-border hover:border-primary rounded-lg flex items-center justify-center transition-all duration-300 group hover:scale-110 hover-glow animate-fade-in-up"
                   style={{ animationDelay: "0.1s" }}
                 >
                   <Linkedin className="text-xl group-hover:text-primary-foreground transition-colors duration-300" />
                 </a>
                 <a
-                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://x.com/crypto_kk3"
                   className="w-12 h-12 bg-secondary hover:bg-gradient-to-r hover:from-primary hover:to-blue-500 border border-border hover:border-primary rounded-lg flex items-center justify-center transition-all duration-300 group hover:scale-110 hover-glow animate-fade-in-up"
                   style={{ animationDelay: "0.2s" }}
                 >
                   <Twitter className="text-xl group-hover:text-primary-foreground transition-colors duration-300" />
                 </a>
                 <a
-                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="mailto:vincent.jin6@icloud.com"
                   className="w-12 h-12 bg-secondary hover:bg-gradient-to-r hover:from-primary hover:to-blue-500 border border-border hover:border-primary rounded-lg flex items-center justify-center transition-all duration-300 group hover:scale-110 hover-glow animate-fade-in-up"
                   style={{ animationDelay: "0.3s" }}
                 >

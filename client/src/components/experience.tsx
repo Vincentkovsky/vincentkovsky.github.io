@@ -3,32 +3,18 @@ import VisitorStats from "@/components/visitor-stats";
 
 const experiences = [
   {
-    title: "Senior Frontend Developer",
-    company: "Tech Innovations",
-    period: "2022 - Present",
+    title: "Full Stack Developer",
+    company: "UTS",
+    period: "2023 - Present",
     description:
-      "Led front-end development of modern web applications using React and TypeScript. Collaborated closely with design and backend teams to deliver high-performance, user-centric solutions.",
+      "Developed a real-time web-based flood visualization and prediction system using Vue 3, DeckGL, FastAPI, and FloodTransformer, achieving 80% faster tile loading and ultra-fast flood forecasting over an 800km2 area within 3 seconds.",
   },
   {
     title: "Full Stack Developer",
-    company: "Digital Solutions",
-    period: "2020 - 2022",
+    company: "H2X",
+    period: "2022 - 2023",
     description:
-      "Built and maintained web applications using Node.js, Express, and React. Implemented RESTful APIs and managed database schemas for optimal performance.",
-  },
-  {
-    title: "Junior Developer",
-    company: "StartupCo",
-    period: "2019 - 2020",
-    description:
-      "Contributed to frontend development using HTML, CSS, and JavaScript. Gained valuable experience in responsive design and cross-browser compatibility.",
-  },
-  {
-    title: "Web Development Intern",
-    company: "Local Agency",
-    period: "2018 - 2019",
-    description:
-      "Assisted in the development of responsive websites for clients. Learned about modern web development practices and client communication.",
+      "Contributed to full-stack development at H2X Engineering by implementing user and organization management features, resolving AWS-related bugs, building system validations and heatmap visualizations, and ensuring application correctness with end-to-end testing using Vue.js, Node.js, and AWS.",
   },
 ];
 
