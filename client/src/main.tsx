@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
-import "./lib/i18n"; // Import i18n configuration
+import i18n from "./lib/i18n"; // 直接导入i18n实例
 import { LanguageProvider } from "./lib/languageContext";
 
 // 处理从404.html的重定向
@@ -29,13 +29,52 @@ function handleGitHubPagesRedirect() {
   }
 }
 
-// 在应用初始化时执行重定向处理
-handleGitHubPagesRedirect();
+// 处理URL中的语言参数
+function handleLanguageParam() {
+  const url = new URL(window.location.href);
+  const langParam = url.searchParams.get("lang");
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+  if (langParam && (langParam === "en" || langParam === "zh")) {
+    console.log(`Setting language from URL parameter: ${langParam}`);
+    i18n.changeLanguage(langParam);
+    // 可选：从URL中移除语言参数
+    // url.searchParams.delete("lang");
+    // window.history.replaceState(null, document.title, url.toString());
+  }
+}
+
+// 在应用初始化时执行重定向处理和语言处理
+handleGitHubPagesRedirect();
+handleLanguageParam();
+
+// 包装应用组件以处理语言变化
+const AppWithLanguageHandling = () => {
+  useEffect(() => {
+    // 监听语言变化，可以在这里执行额外操作
+    const handleLanguageChanged = (lng: string) => {
+      document.documentElement.lang = lng;
+      console.log(`Language changed to: ${lng}`);
+    };
+
+    i18n.on("languageChanged", handleLanguageChanged);
+
+    // 设置初始语言
+    document.documentElement.lang = i18n.language;
+
+    return () => {
+      i18n.off("languageChanged", handleLanguageChanged);
+    };
+  }, []);
+
+  return (
     <LanguageProvider>
       <App />
     </LanguageProvider>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <AppWithLanguageHandling />
   </React.StrictMode>
 );
