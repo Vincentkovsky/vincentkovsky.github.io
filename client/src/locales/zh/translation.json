@@ -62,8 +62,7 @@
     "top_locations": "热门访问地区",
     "based_in": "当前位置",
     "unknown_location": "未知位置",
-    "last_updated": "最后更新",
-    "map_unavailable": "地图可视化暂时不可用。请尝试刷新页面。"
+    "last_updated": "最后更新"
   },
   "contact": {
     "title": "联系方式",

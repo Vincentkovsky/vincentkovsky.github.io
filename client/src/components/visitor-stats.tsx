@@ -774,11 +774,6 @@ export default function VisitorStats() {
           </p>
         )}
         {error && <p className="text-xs text-muted-foreground mt-2 opacity-60">{error}</p>}
-        {!mapInitialized && !loading && (
-          <p className="text-xs text-muted-foreground mt-2 opacity-60">
-            {t("visitor_stats.map_unavailable")}
-          </p>
-        )}
       </div>
     </div>
   );

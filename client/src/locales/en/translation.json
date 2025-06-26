@@ -62,8 +62,7 @@
     "top_locations": "Top Visitor Locations",
     "based_in": "Based in",
     "unknown_location": "Unknown Location",
-    "last_updated": "Last updated",
-    "map_unavailable": "Map visualization temporarily unavailable. Try refreshing the page."
+    "last_updated": "Last updated"
   },
   "contact": {
     "title": "Get In Touch",
