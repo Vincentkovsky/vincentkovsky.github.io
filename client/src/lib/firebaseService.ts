@@ -220,10 +220,8 @@ export const recordVisitorLocation = async () => {
         });
       }
 
-      // If this is a new visitor, update the statistics collection
-      if (isNewVisitor) {
-        await updateVisitorStats(visitorData);
-      }
+      // 无论是否为新访问者，都更新统计数据
+      await updateVisitorStats(visitorData);
 
       // Add the document ID to the visitor data before returning
       return {
