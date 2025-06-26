@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Code, Wrench } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   SiReact,
   SiNodedotjs,
@@ -25,6 +26,7 @@ const technicalSkills: Skill[] = [
 export default function Skills() {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -51,7 +53,7 @@ export default function Skills() {
           <div className="bg-card rounded-xl p-8 border border-border card-hover-effect">
             <h3 className="text-2xl font-bold mb-8 text-gradient flex items-center">
               <Code className="mr-3" />
-              Technical Skills
+              {t("skills.technical")}
             </h3>
             <div className="space-y-6">
               {technicalSkills.map((skill, index) => (
@@ -84,7 +86,7 @@ export default function Skills() {
           <div className="bg-card rounded-xl p-8 border border-border card-hover-effect">
             <h3 className="text-2xl font-bold mb-8 text-gradient flex items-center">
               <Wrench className="mr-3" />
-              Tools & Technologies
+              {t("skills.tools")}
             </h3>
             <div className="grid grid-cols-2 gap-4">
               {[

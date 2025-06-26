@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Globe, MapPin, Users, Flag, Building, Activity } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   getVisitorStats,
   recordVisitorLocation,
@@ -40,6 +41,7 @@ export default function VisitorStats() {
   const mapInstanceRef = useRef<any>(null);
   const heatLayerRef = useRef<any>(null);
   const [mapInitialized, setMapInitialized] = useState(false);
+  const { t } = useTranslation();
 
   // Predefined colors for top locations
   const locationColors = [
@@ -691,7 +693,7 @@ export default function VisitorStats() {
             <Users className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <h5 className="text-sm font-medium">Total Visits</h5>
+            <h5 className="text-sm font-medium">{t("visitor_stats.total_visits")}</h5>
             <p className="text-lg font-bold text-gradient">{stats?.totalVisitors || 0}</p>
           </div>
         </div>
@@ -700,14 +702,16 @@ export default function VisitorStats() {
             <Activity className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <h5 className="text-sm font-medium">Your IP</h5>
+            <h5 className="text-sm font-medium">{t("visitor_stats.your_ip")}</h5>
             <p className="text-sm font-mono text-gradient">{visitorLocation?.ip || "Unknown"}</p>
           </div>
         </div>
       </div>
 
       <div className="space-y-4">
-        <h4 className="text-lg font-semibold mb-4 text-gradient">Top Visitor Locations</h4>
+        <h4 className="text-lg font-semibold mb-4 text-gradient">
+          {t("visitor_stats.top_locations")}
+        </h4>
         <div className="space-y-3">
           {stats && stats.topCities.length > 0
             ? stats.topCities.slice(0, 3).map((city, index) => (
@@ -755,24 +759,24 @@ export default function VisitorStats() {
       <div className="mt-6 pt-6 border-t border-border">
         <p className="text-muted-foreground text-sm flex items-center hover:text-primary transition-colors duration-300">
           <MapPin className="mr-2 text-primary w-4 h-4 animate-pulse-slow" />
-          Based in:{" "}
+          {t("visitor_stats.based_in")}:{" "}
           <span className="text-gradient ml-1 font-semibold">
             {visitorLocation?.city && visitorLocation?.country_name
               ? `${visitorLocation.city}, ${visitorLocation.country_name}`
               : visitorLocation?.city && visitorLocation?.country
               ? `${visitorLocation.city}, ${visitorLocation.country}`
-              : "Unknown Location"}
+              : t("visitor_stats.unknown_location")}
           </span>
         </p>
         {stats?.lastUpdated && (
           <p className="text-xs text-muted-foreground mt-2 opacity-60">
-            Last updated: {new Date(stats.lastUpdated).toLocaleString()}
+            {t("visitor_stats.last_updated")}: {new Date(stats.lastUpdated).toLocaleString()}
           </p>
         )}
         {error && <p className="text-xs text-muted-foreground mt-2 opacity-60">{error}</p>}
         {!mapInitialized && !loading && (
           <p className="text-xs text-muted-foreground mt-2 opacity-60">
-            Map visualization temporarily unavailable. Try refreshing the page.
+            {t("visitor_stats.map_unavailable")}
           </p>
         )}
       </div>

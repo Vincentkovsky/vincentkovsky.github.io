@@ -1,0 +1,98 @@
+{
+  "navigation": {
+    "about": "About",
+    "skills": "Skills",
+    "projects": "Projects",
+    "experience": "Experience",
+    "contact": "Contact",
+    "language": "Language"
+  },
+  "hero": {
+    "title": "Vincent Jin",
+    "subtitle": "Software Developer & Engineer",
+    "description": "I'm a software developer passionate about building personal projects and exploring emerging technologies. I thrive on experimenting with AI-driven solutions and using my real-world experience with crypto, always seeking to bridge innovation with practical applications."
+  },
+  "skills": {
+    "technical": "Technical Skills",
+    "tools": "Tools & Technologies"
+  },
+  "projects": {
+    "title": "Featured Projects",
+    "subtitle": "A showcase of my recent work spanning web applications, tools, and creative experiments",
+    "items": {
+      "flood": {
+        "title": "AI-Enhanced Flood Simulation System",
+        "description": "Web-based flood simulation system using Vue 3 and FloodTransformer for real-time prediction, with ultra fast inference and results post-processing."
+      },
+      "cregis": {
+        "title": "CregisRAG",
+        "description": "CregisRAG is an intelligent question-answering system leveraging Retrieval-Augmented Generation (RAG) technology, which integrates large language models (LLMs) with precision retrieval from multi-source knowledge bases to deliver accurate, traceable responses and adaptive learning capabilities."
+      },
+      "pressure": {
+        "title": "Pressure Sense iOS App",
+        "description": "PressureSense is an iOS application designed to help users monitor and manage their stress levels through continuous health data analysis. The app provides real-time stress monitoring, detailed analysis, and personalized recommendations."
+      },
+      "anchor": {
+        "title": "Anchor - News aggregator iOS App",
+        "description": "Anchor is an iOS news aggregator app that integrates bionic reading technology to enhance content consumption efficiency and focus through optimized text visualization."
+      }
+    }
+  },
+  "experience": {
+    "title": "Experience Timeline",
+    "visitor": "Visitor Geography",
+    "jobs": {
+      "fullstack_uts": {
+        "title": "Full Stack Software Developer",
+        "company": "UTS",
+        "period": "2023 - Present",
+        "description": "Developed a real-time web-based flood visualization and prediction system using Vue 3, DeckGL, FastAPI, and FloodTransformer, achieving 80% faster tile loading and ultra-fast flood forecasting over an 800km2 area within 3 seconds."
+      },
+      "fullstack_h2x": {
+        "title": "Full Stack Developer",
+        "company": "H2X",
+        "period": "2022 - 2023",
+        "description": "Contributed to full-stack development at H2X Engineering by implementing user and organization management features, resolving AWS-related bugs, building system validations and heatmap visualizations, and ensuring application correctness with end-to-end testing using Vue.js, Node.js, and AWS."
+      }
+    }
+  },
+  "visitor_stats": {
+    "total_visits": "Total Visits",
+    "your_ip": "Your IP",
+    "top_locations": "Top Visitor Locations",
+    "based_in": "Based in",
+    "unknown_location": "Unknown Location",
+    "last_updated": "Last updated",
+    "map_unavailable": "Map visualization temporarily unavailable. Try refreshing the page."
+  },
+  "contact": {
+    "title": "Get In Touch",
+    "subtitle": "I'm always open to discussing new opportunities, interesting projects, or just having a friendly chat about technology.",
+    "form": {
+      "title": "Send Message",
+      "name": "Name",
+      "name_placeholder": "Your name",
+      "email": "Email",
+      "email_placeholder": "your@email.com",
+      "message": "Message",
+      "message_placeholder": "Your message...",
+      "submit": "Send Message",
+      "submitting": "Sending...",
+      "success": "Message sent successfully!",
+      "success_description": "Thank you for your message. I'll get back to you soon.",
+      "error": "Failed to send message",
+      "error_description": "Please try again later."
+    },
+    "info": {
+      "title": "Or Reach Via",
+      "email": "Email",
+      "location": "Location",
+      "location_value": "China",
+      "follow": "Follow Me"
+    }
+  },
+  "footer": {
+    "rights": "© 2025 Vincent Jin. All rights reserved.",
+    "built": "Built with ❤️, Replit and Cursor"
+  }
+}

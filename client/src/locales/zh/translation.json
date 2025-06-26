@@ -1,0 +1,98 @@
+{
+  "navigation": {
+    "about": "关于我",
+    "skills": "技能",
+    "projects": "项目",
+    "experience": "经验",
+    "contact": "联系我",
+    "language": "语言"
+  },
+  "hero": {
+    "title": "金文正",
+    "subtitle": "软件开发工程师",
+    "description": "我是一名热衷于构建个人项目和探索新兴技术的软件开发者。我喜欢尝试AI驱动的解决方案，并利用我在加密货币领域的实际经验，始终寻求将创新与实际应用相结合。"
+  },
+  "skills": {
+    "technical": "技术能力",
+    "tools": "工具与技术"
+  },
+  "projects": {
+    "title": "精选项目",
+    "subtitle": "展示我最近的作品，涵盖网络应用、工具和创意实验",
+    "items": {
+      "flood": {
+        "title": "AI增强型洪水模拟系统",
+        "description": "基于Vue 3和FloodTransformer的网页洪水模拟系统，用于实时预测，具有超快速推理和结果后处理功能。"
+      },
+      "cregis": {
+        "title": "CregisRAG",
+        "description": "CregisRAG是一个智能问答系统，利用检索增强生成(RAG)技术，将大型语言模型(LLM)与多源知识库的精确检索相结合，提供准确、可追溯的响应和自适应学习能力。"
+      },
+      "pressure": {
+        "title": "压力感知iOS应用",
+        "description": "PressureSense是一款iOS应用程序，旨在通过持续的健康数据分析帮助用户监控和管理压力水平。该应用提供实时压力监测、详细分析和个性化建议。"
+      },
+      "anchor": {
+        "title": "Anchor - 新闻聚合iOS应用",
+        "description": "Anchor是一款iOS新闻聚合应用，集成了仿生阅读技术，通过优化文本可视化来提高内容消费效率和注意力集中度。"
+      }
+    }
+  },
+  "experience": {
+    "title": "工作经历",
+    "visitor": "访问者地理分布",
+    "jobs": {
+      "fullstack_uts": {
+        "title": "全栈软件开发工程师",
+        "company": "悉尼科技大学",
+        "period": "2023 - 至今",
+        "description": "使用Vue 3、DeckGL、FastAPI和FloodTransformer开发了实时网页洪水可视化和预测系统，实现了80%更快的瓦片加载速度，并在3秒内完成800平方公里区域的超快洪水预测。"
+      },
+      "fullstack_h2x": {
+        "title": "全栈开发工程师",
+        "company": "H2X",
+        "period": "2022 - 2023",
+        "description": "在H2X工程公司负责全栈开发，实现了用户和组织管理功能，解决了AWS相关的bug，构建了系统验证和热图可视化，并使用Vue.js、Node.js和AWS进行端到端测试，确保应用程序的正确性。"
+      }
+    }
+  },
+  "visitor_stats": {
+    "total_visits": "总访问量",
+    "your_ip": "您的IP",
+    "top_locations": "热门访问地区",
+    "based_in": "当前位置",
+    "unknown_location": "未知位置",
+    "last_updated": "最后更新",
+    "map_unavailable": "地图可视化暂时不可用。请尝试刷新页面。"
+  },
+  "contact": {
+    "title": "联系方式",
+    "subtitle": "我随时欢迎讨论新的机会、有趣的项目，或者只是友好地聊聊技术。",
+    "form": {
+      "title": "发送消息",
+      "name": "姓名",
+      "name_placeholder": "您的姓名",
+      "email": "邮箱",
+      "email_placeholder": "your@email.com",
+      "message": "消息",
+      "message_placeholder": "您的消息...",
+      "submit": "发送消息",
+      "submitting": "发送中...",
+      "success": "消息发送成功！",
+      "success_description": "感谢您的留言。我会尽快回复您。",
+      "error": "消息发送失败",
+      "error_description": "请稍后再试。"
+    },
+    "info": {
+      "title": "或通过以下方式联系",
+      "email": "邮箱",
+      "location": "位置",
+      "location_value": "中国",
+      "follow": "关注我"
+    }
+  },
+  "footer": {
+    "rights": "© 2025 金文正。保留所有权利。",
+    "built": "用 ❤️, Replit 和 Cursor 构建"
+  }
+}

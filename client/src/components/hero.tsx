@@ -1,7 +1,10 @@
 import { Github, Linkedin, Mail } from "lucide-react";
 import avatar from "@/assets/avatar.png";
+import { useTranslation } from "react-i18next";
 
 export default function Hero() {
+  const { t } = useTranslation();
+
   return (
     <section
       id="about"
@@ -29,22 +32,19 @@ export default function Hero() {
           />
         </div>
         <h1 className="text-4xl md:text-6xl font-bold mb-4">
-          Vincent <span className="text-gradient">Jin</span>
+          <span className="text-gradient">{t("hero.title")}</span>
         </h1>
         <p
           className="text-xl md:text-2xl text-muted-foreground mb-6 animate-fade-in-up"
           style={{ animationDelay: "0.2s" }}
         >
-          Software Developer & Engineer
+          {t("hero.subtitle")}
         </p>
         <p
           className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed animate-fade-in-up"
           style={{ animationDelay: "0.4s" }}
         >
-          I'm a software developer passionate about building personal projects and exploring
-          emerging technologies. I thrive on experimenting with AI-driven solutions and using my
-          real-world experience with crypto, always seeking to bridge innovation with practical
-          applications.
+          {t("hero.description")}
         </p>
         <div
           className="flex justify-center space-x-6 animate-fade-in-up"

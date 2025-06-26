@@ -2,6 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import "./lib/i18n"; // Import i18n configuration
+import { LanguageProvider } from "./lib/languageContext";
 
 // 处理从404.html的重定向
 function handleGitHubPagesRedirect() {
@@ -32,6 +34,8 @@ handleGitHubPagesRedirect();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <App />
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
   </React.StrictMode>
 );

@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./language-switcher";
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,48 +40,52 @@ export default function Navigation() {
           <div className="text-xl font-bold text-primary">
             Vincent<span className="text-foreground">Jin</span>
           </div>
-          <div className="hidden md:flex space-x-8">
+          <div className="hidden md:flex items-center space-x-8">
             <button
               onClick={() => scrollToSection("about")}
               className="text-foreground hover:text-primary transition-colors duration-300"
             >
-              About
+              {t("navigation.about")}
             </button>
             <button
               onClick={() => scrollToSection("skills")}
               className="text-foreground hover:text-primary transition-colors duration-300"
             >
-              Skills
+              {t("navigation.skills")}
             </button>
             <button
               onClick={() => scrollToSection("projects")}
               className="text-foreground hover:text-primary transition-colors duration-300"
             >
-              Projects
+              {t("navigation.projects")}
             </button>
             <button
               onClick={() => scrollToSection("experience")}
               className="text-foreground hover:text-primary transition-colors duration-300"
             >
-              Experience
+              {t("navigation.experience")}
             </button>
             <button
               onClick={() => scrollToSection("contact")}
               className="text-foreground hover:text-primary transition-colors duration-300"
             >
-              Contact
+              {t("navigation.contact")}
+            </button>
+            <LanguageSwitcher />
+          </div>
+          <div className="md:hidden flex items-center space-x-2">
+            <LanguageSwitcher />
+            <button className="text-foreground hover:text-primary transition-colors">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
             </button>
           </div>
-          <button className="md:hidden text-foreground hover:text-primary transition-colors">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
         </div>
       </div>
     </nav>
