@@ -8,6 +8,8 @@ import {
   SiGit,
   SiDocker,
   SiAmazonwebservices,
+  SiRedis,
+  SiKubernetes,
 } from "react-icons/si";
 
 interface Skill {
@@ -20,7 +22,7 @@ const technicalSkills: Skill[] = [
   { name: "React & Next.js", percentage: 85 },
   { name: "Node.js", percentage: 80 },
   { name: "Python", percentage: 75 },
-  { name: "UX/UI Design", percentage: 70 },
+  { name: "Vibe Coding", percentage: 70 },
 ];
 
 export default function Skills() {
@@ -94,8 +96,10 @@ export default function Skills() {
                 { icon: SiNodedotjs, name: "Node.js", color: "#339933" },
                 { icon: SiPython, name: "Python", color: "#3776AB" },
                 { icon: SiGit, name: "Git", color: "#F05032" },
-                { icon: SiDocker, name: "Docker", color: "#2496ED" },
+                { icon: SiRedis, name: "Redis", color: "#DC382D" },
                 { icon: SiAmazonwebservices, name: "AWS", color: "#FF9900" },
+                { icon: SiDocker, name: "Docker", color: "#2496ED" },
+                { icon: SiKubernetes, name: "Kubernetes", color: "#326CE5" },
               ].map((tool, index) => (
                 <div
                   key={tool.name}
