@@ -14,7 +14,7 @@ export default function Projects() {
       image: flood,
       tags: ["Vue 3", "TypeScript", "DeckGL", "FastAPI", "FloodTransformer"],
       github: "https://github.com/Vincentkovsky/SES_Fullstack_App",
-      live: "#",
+      live: "https://www.youtube.com/watch?v=mgDz2qyfFBw&t=32s&ab_channel=%E7%A9%BA%E8%85%B9%E5%88%B0%E5%BA%95%E8%83%BD%E4%B8%8D%E8%83%BD%E5%90%83%E9%A5%AD",
     },
     {
       titleKey: "projects.items.cregis.title",
