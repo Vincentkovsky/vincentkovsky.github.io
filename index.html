@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Vincent Jin - Software Developer & Engineer</title>
+    <meta
+      name="description"
+      content="Portfolio of Vincent Jin, a passionate software developer specializing in React, Node.js, and modern web technologies. Explore my projects and experience in building innovative applications."
+    />
+    <meta property="og:title" content="Vincent Jin - Software Developer & Engineer" />
+    <meta
+      property="og:description"
+      content="Portfolio showcasing innovative projects and expertise in modern web development technologies."
+    />
+    <meta property="og:type" content="website" />
+    <!-- Favicon - 使用相对路径 -->
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon-Crb2pmdD.svg" />
+
+    <!-- 在文档的<head>中添加base标签，确保相对URL都基于此 -->
+    <base href="" />
+
+    <!-- GitHub Pages SPA routing script - 改进版本 -->
+    <script type="text/javascript">
+      // 检测当前环境并设置适当的base
+      (function () {
+        // 检测是否在GitHub Pages
+        const isGitHubPages =
+          window.location.hostname.includes("github.io") ||
+          window.location.hostname.includes("vincentjin.dev");
+
+        // 设置仓库名
+        const repoName = "PersonalWeb";
+
+        // 如果在GitHub Pages上，设置base href
+        if (isGitHubPages) {
+          document.querySelector("base").setAttribute("href", `/${repoName}/`);
+        } else {
+          document.querySelector("base").setAttribute("href", "/");
+        }
+
+        // 原有的SPA路由脚本
+        if (window.location.search[1] === "/") {
+          var decoded = window.location.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(
+            null,
+            null,
+            window.location.pathname.slice(0, -1) + decoded + window.location.hash
+          );
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-D0_5Jo8k.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CZCY5C8s.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
