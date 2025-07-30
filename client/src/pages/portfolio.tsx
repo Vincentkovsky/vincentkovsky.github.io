@@ -3,6 +3,7 @@ import Hero from "@/components/hero";
 import Skills from "@/components/skills";
 import Projects from "@/components/projects";
 import Experience from "@/components/experience";
+import Education from "@/components/education";
 import Contact from "@/components/contact";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +18,7 @@ export default function Portfolio() {
         <Skills />
         <Projects />
         <Experience />
+        <Education />
         <Contact />
       </main>
       <footer className="py-12 px-6 border-t border-border">

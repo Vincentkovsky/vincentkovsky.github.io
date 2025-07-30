@@ -1,4 +1,4 @@
-import { Github, Linkedin, Mail } from "lucide-react";
+import { Github, Linkedin, Mail, Youtube } from "lucide-react";
 import avatar from "@/assets/avatar.png";
 import { useTranslation } from "react-i18next";
 
@@ -73,6 +73,14 @@ export default function Hero() {
             className="text-2xl text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-125 hover-glow p-3 rounded-full"
           >
             <Mail />
+          </a>
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://www.youtube.com/@%E7%A9%BA%E8%85%B9%E5%88%B0%E5%BA%95%E8%83%BD%E4%B8%8D%E8%83%BD%E5%90%83%E9%A5%AD/videos"
+            className="text-2xl text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-125 hover-glow p-3 rounded-full"
+          >
+            <Youtube />
           </a>
         </div>
       </div>

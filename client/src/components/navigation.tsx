@@ -66,6 +66,12 @@ export default function Navigation() {
               {t("navigation.experience")}
             </button>
             <button
+              onClick={() => scrollToSection("education")}
+              className="text-foreground hover:text-primary transition-colors duration-300"
+            >
+              {t("navigation.education")}
+            </button>
+            <button
               onClick={() => scrollToSection("contact")}
               className="text-foreground hover:text-primary transition-colors duration-300"
             >

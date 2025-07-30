@@ -4,6 +4,7 @@
     "skills": "技能",
     "projects": "项目",
     "experience": "经验",
+    "education": "教育背景",
     "contact": "联系我",
     "language": "语言"
   },
@@ -53,6 +54,26 @@
         "company": "H2X",
         "period": "2022 - 2023",
         "description": "在H2X工程公司负责全栈开发，实现了用户和组织管理功能，解决了AWS相关的bug，构建了系统验证和热图可视化，并使用Vue.js、Node.js和AWS进行端到端测试，确保应用程序的正确性。"
+      }
+    }
+  },
+  "education": {
+    "title": "教育背景",
+    "degrees": {
+      "master": {
+        "title": "信息技术硕士",
+        "university": "悉尼科技大学",
+        "period": "2021年8月 – 2023年8月",
+        "location": "澳大利亚悉尼",
+        "scholarship": "周泽荣博士奖学金（全额奖学金）"
+      },
+      "bachelor": {
+        "title": "机械设计及其自动化学士",
+        "university": "上海理工大学",
+        "period": "2016年9月 – 2020年6月",
+        "location": "中国上海",
+        "scholarship": "国家励志奖学金（每班每年1名）",
+        "recommendation": "研究生推免资格（58名候选人中排名第1）"
       }
     }
   },

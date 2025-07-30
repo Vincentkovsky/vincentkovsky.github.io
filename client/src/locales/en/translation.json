@@ -4,6 +4,7 @@
     "skills": "Skills",
     "projects": "Projects",
     "experience": "Experience",
+    "education": "Education",
     "contact": "Contact",
     "language": "Language"
   },
@@ -53,6 +54,26 @@
         "company": "H2X",
         "period": "2022 - 2023",
         "description": "Contributed to full-stack development at H2X Engineering by implementing user and organization management features, resolving AWS-related bugs, building system validations and heatmap visualizations, and ensuring application correctness with end-to-end testing using Vue.js, Node.js, and AWS."
+      }
+    }
+  },
+  "education": {
+    "title": "Education",
+    "degrees": {
+      "master": {
+        "title": "Master of Information Technology",
+        "university": "University of Technology Sydney",
+        "period": "Aug. 2021 – Aug. 2023",
+        "location": "Sydney, Australia",
+        "scholarship": "Dr Chau Chak Wing Scholarship (Full scholarship)"
+      },
+      "bachelor": {
+        "title": "Bachelor of Engineering in Manufacturing Systems Engineering",
+        "university": "University of Shanghai for Science and Technology",
+        "period": "Sep. 2016 – Jun. 2020",
+        "location": "Shanghai, China",
+        "scholarship": "National Encouragement Scholarship (1 place per class per year)",
+        "recommendation": "Postgraduate Recommendation (Top 1 among 58 candidates)"
       }
     }
   },
