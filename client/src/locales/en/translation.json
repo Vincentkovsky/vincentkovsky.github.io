@@ -21,6 +21,10 @@
     "title": "Featured Projects",
     "subtitle": "A showcase of my recent work spanning web applications, tools, and creative experiments",
     "items": {
+      "fastgpt": {
+        "title": "FastGPT Chrome Extension",
+        "description": "A powerful Chrome extension that provides seamless access to your FastGPT knowledge base directly from your browser. Features real-time streaming responses, persistent chat history, encrypted storage, and a modern UI with comprehensive settings management."
+      },
       "flood": {
         "title": "AI-Enhanced Flood Simulation System",
         "description": "Web-based flood simulation system using Vue 3 and FloodTransformer for real-time prediction, with ultra fast inference and results post-processing."

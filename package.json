@@ -10,7 +10,10 @@
     "predeploy:gh-pages": "npm run build",
     "deploy:gh-pages": "gh-pages -d dist",
     "deploy:firebase": "firebase deploy",
-    "check": "tsc"
+    "check": "tsc",
+    "export-resume": "node scripts/export-resume-simple.cjs",
+    "export-resume:html": "pandoc resume.md -o dist/resume.html --standalone --css=styles/resume.css --metadata title=\"Vincent Jin - Resume\"",
+    "export-resume:pdf": "pandoc resume.md -o dist/resume.pdf --pdf-engine=xelatex -V geometry:margin=1in -V fontsize=11pt -V documentclass=article"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

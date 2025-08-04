@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./language-switcher";
+import ResumeExport from "./resume-export";
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);

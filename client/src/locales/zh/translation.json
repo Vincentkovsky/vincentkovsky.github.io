@@ -21,6 +21,10 @@
     "title": "精选项目",
     "subtitle": "展示我最近的作品，涵盖网络应用、工具和创意实验",
     "items": {
+      "fastgpt": {
+        "title": "FastGPT Chrome 扩展",
+        "description": "一款功能强大的Chrome扩展程序，让您可以直接从浏览器无缝访问FastGPT知识库。具有实时流式响应、持久聊天历史、加密存储和现代化UI界面，以及全面的设置管理功能。"
+      },
       "flood": {
         "title": "AI增强型洪水模拟系统",
         "description": "基于Vue 3和FloodTransformer的网页洪水模拟系统，用于实时预测，具有超快速推理和结果后处理功能。"

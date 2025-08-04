@@ -3,11 +3,20 @@ import { useTranslation } from "react-i18next";
 import CregisRAG from "../assets/CregisRAG.png";
 import anchor from "../assets/Anchor.png";
 import flood from "../assets/flood.png";
+import fastGPT from "../assets/fastGPT.png";
 
 export default function Projects() {
   const { t } = useTranslation();
 
   const projects = [
+    {
+      titleKey: "projects.items.fastgpt.title",
+      descriptionKey: "projects.items.fastgpt.description",
+      image: fastGPT,
+      tags: ["TypeScript", "Chrome Extension", "Manifest V3", "Webpack", "FastGPT API"],
+      github: "https://github.com/Vincentkovsky/FastGPTChromeExtension",
+      live: "#",
+    },
     {
       titleKey: "projects.items.flood.title",
       descriptionKey: "projects.items.flood.description",
