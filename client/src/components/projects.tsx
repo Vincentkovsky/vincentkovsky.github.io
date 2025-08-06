@@ -15,7 +15,7 @@ export default function Projects() {
       image: fastGPT,
       tags: ["TypeScript", "Chrome Extension", "Manifest V3", "Webpack", "FastGPT API"],
       github: "https://github.com/Vincentkovsky/FastGPTChromeExtension",
-      live: "#",
+      live: "https://chromewebstore.google.com/detail/fastgpt-chrome-extension/gpeflklcfiljncdjfjbbidaofgcpjhba?authuser=0&hl=en-AU",
     },
     {
       titleKey: "projects.items.flood.title",
